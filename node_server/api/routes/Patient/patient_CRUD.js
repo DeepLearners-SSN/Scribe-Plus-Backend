@@ -3,6 +3,22 @@ const router = express();
 const { createPatient,getPatient,patientCount } = require("../Blockchain/connection/handlers.js");
 
 
+/**
+ * @swagger
+ * /api/patient/count:
+ *   get:
+ *      tags:
+ *          - patient
+ *      description: Returns the count of patient registered in the blockchain
+ *      responses:
+ *          200:
+ *             description: A json containing a message
+ *             schema:
+ *                  type: object
+ *                  properties:
+ *                          count:
+ *                              type: string
+ */
 router.get('/count',async(req,res,next) => {
     const count = await patientCount();
     res.status(200).json({count:count});
