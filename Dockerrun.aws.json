@@ -4,6 +4,7 @@
         {
             "essential": true,
             "image": "mongo",
+            "memory": 800,
             "mountPoints": [
                 {
                     "containerPath": "/data/lib/",
@@ -21,6 +22,7 @@
         {
             "essential": true,
             "name": "flask",
+            "memory": 200,
             "image": "jayvishaalj/scribeplus",
             "portMappings": [
                 {
@@ -36,6 +38,7 @@
         {
             "essential": true,
             "name": "ganache",
+            "memory": 200,
             "image": "jayvishaalj/ganache",
             "portMappings": [
                 {
@@ -54,6 +57,7 @@
             ],
             "essential": true,
             "name": "nodeserver",
+            "memory": 400,
             "image": "jayvishaalj/testrepo",
             "portMappings": [
                 {
