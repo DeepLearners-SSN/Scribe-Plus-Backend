@@ -25,7 +25,7 @@ services:
     nodeserver:
         image: jayvishaalj/testrepo
         # build: node_server/.
-        command: nodemon -L  --ignore 'build/*.json' app.js 
+        # command: nodemon -L  --ignore 'build/*.json' app.js 
         ports: 
             - "3000:3000"
         depends_on: 
