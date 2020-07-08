@@ -3,6 +3,6 @@ FROM node:8-alpine
 WORKDIR /app
 
 RUN npm_config_unsafe_perm=true
-RUN npm install -g ganache-cli
+RUN npm install ganache-cli
 
 CMD ["ganache-cli","-h","0.0.0.0","-a","100"]
