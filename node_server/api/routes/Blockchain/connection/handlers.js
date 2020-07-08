@@ -1,5 +1,5 @@
 const fs = require('fs-extra');
-const { web3 } = require('./deploy.js');
+const { web3, accounts } = require('./deploy.js');
 
 
 
@@ -39,7 +39,13 @@ const createDoctor = async(name, phno, email, password) =>{
 const getDoctor = async(address) =>{
     console.log("GET DOCTOR : ",address);
     const contractObject = getContractObject();
-    return await contractObject.methods.getDoctor(address).call().then((doc) => {return doc});
+    try{
+        return await contractObject.methods.getDoctor(address).call().then((doc) => {return doc});
+   }
+    catch(e){
+        return e;
+    }
+    
 }
 
 const getDocCount  = async() => {
@@ -47,7 +53,46 @@ const getDocCount  = async() => {
     return await contractObject.methods.doctorCount().call().then((c) => { return c });
 }
 
+const getPatCount  = async() => {
+    const contractObject = getContractObject();
+    return await contractObject.methods.patientCount().call().then((c) => { return c });
+}
+
+const createPatient = async(name, phno, email) =>{
+    console.log("CREATE PATIENT : ",name,phno,email);
+    const contractObject = getContractObject();
+    return web3.eth.getAccounts().then(async (accounts) => {
+        let hash = {}
+        console.log(accounts[0]);
+        await  contractObject.methods.addPatient(name, phno, email).send({from:accounts[0],gas:'1000000'},(err,thash) => {
+            console.log(thash,phno);
+            hash = thash;
+            });
+        return {account:phno,hash:hash};
+    });
+}
+
+const getPatient = async(phone,address) =>{
+    console.log("GET PATIENT : ",phone);
+    const contractObject = getContractObject();
+    try{
+        await  contractObject.methods.getPatient(phone).call({from:accounts[0]}).then((patient) => {
+            console.log("PAT : ",patient);
+            return result;
+        });
+        
+
+   }
+    catch(e){
+        return e;
+    }
+    
+}
+
 module.exports.getMessage = getMessage;
 module.exports.getDocCount = getDocCount;
 module.exports.createDoctor = createDoctor;
 module.exports.getDoctor = getDoctor;
+module.exports.createPatient = createPatient;
+module.exports.getPatient = getPatient;
+module.exports.patientCount = getPatCount;

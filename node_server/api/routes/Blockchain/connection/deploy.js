@@ -26,10 +26,10 @@ const initialize = async() => {
     const sourceCode = fs.readFileSync(contractPath,'utf8').toString();
     console.log("AFTER 0 ");
     const compiledCode = compiler.compile(sourceCode,1);
-    console.log("AFTER 1 ");
+    console.log("AFTER 1 ",compiledCode);
     const buildPath = path.resolve(__dirname,"./build");
     console.log("AFTER 2");
-    console.log("CONTRACT : ",compiledCode.contracts[':Scribe']);
+    // console.log("CONTRACT : ",compiledCode.contracts[':Scribe']);
     fs.outputJSONSync(path.resolve(buildPath, "Message"+".json"),compiledCode.contracts[':Scribe']);
     contractInterface = JSON.parse(compiledCode.contracts[':Scribe'].interface);
     console.log("AFTER 3");

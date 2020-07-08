@@ -2,12 +2,14 @@ const express = require('express');
 const router = express();
 const blockchain = require('./Blockchain/blockchain.js');
 const doctor = require('../routes/Doctor/router.js');
-const admin  = require('../routes/Admin/admin.js');
-
+const admin  = require('../routes/Admin/router.js');
+const patient = require('../routes/Patient/router.js');
 
 router.use('/api/blockchain',blockchain);
 router.use('/api/doctor',doctor);
 router.use('/api/admin',admin);
+router.use('/api/patient',patient);
+
 
 /**
  * @swagger
