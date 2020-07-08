@@ -11,7 +11,7 @@ COPY package*.json ./
 
 # RUN apk add python
 RUN npm install
-RUN npm install -g nodemon --allow-root
+RUN npm install nodemon
 # If you are building your code for production
 # RUN npm ci --only=production
 
