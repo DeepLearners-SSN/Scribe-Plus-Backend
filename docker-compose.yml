@@ -1,0 +1,36 @@
+version: "3"
+services: 
+    ganache:
+        build: 
+            context: .
+            dockerfile: Dockerfile.ganache
+        ports: 
+            - "8545:8545"
+    
+    db:
+        image: mongo
+        ports: 
+            - "27017:27017"
+        volumes:
+            - mongo_store:/data/lib/
+    
+    flask:
+        build: flask_server/.
+        ports: 
+            - "5000:5000"
+            - "5001:5001"
+    
+    nodeserver:
+        build: node_server/.
+        command: nodemon -L  --ignore 'build/*.json' app.js 
+        ports: 
+            - "3000:3000"
+        depends_on: 
+            - ganache
+            - db
+            - flask
+        volumes: 
+            - /c/Users/jayvi/SIH/node_server/:/usr/src/app/
+
+volumes: 
+    mongo_store:
