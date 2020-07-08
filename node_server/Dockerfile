@@ -10,10 +10,8 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # RUN apk add python
-RUN npm_config_unsafe_perm=true
-RUN npm --global config set user root
 RUN npm install
-RUN npm install --global --unsafe-perm nodemon
+# RUN npm install -g nodemon
 # If you are building your code for production
 # RUN npm ci --only=production
 
