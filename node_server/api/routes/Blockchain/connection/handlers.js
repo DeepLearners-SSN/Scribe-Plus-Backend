@@ -76,9 +76,9 @@ const getPatient = async(phone,address) =>{
     console.log("GET PATIENT : ",phone);
     const contractObject = getContractObject();
     try{
-        await  contractObject.methods.getPatient(phone).call({from:accounts[0]}).then((patient) => {
+        return await  contractObject.methods.getPatient(phone).call({from:address}).then((patient) => {
             console.log("PAT : ",patient);
-            return result;
+            return patient;
         });
         
 

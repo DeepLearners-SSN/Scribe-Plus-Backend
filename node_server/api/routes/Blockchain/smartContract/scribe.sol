@@ -77,51 +77,57 @@ contract Scribe {
         }
     }
 
-    function getPatient(string memory _phone) public view returns (uint _patientId, string memory _name, string memory _email, uint _doctorsVisitedCount){// ,uint[] memory _prescription, address[] memory  _doctorsVisited){
+    function getPatient(string memory _phone) public view returns (uint _patientId, string memory _name, string memory _email, uint _doctorsVisitedCount, uint[] memory _prescription, address[] memory  _doctorsVisited){
         if(patientExists[_phone]){
-            _patientId = patients[_phone].patientId;
-            _name = patients[_phone].patientName;
-            _email = patients[_phone].email;
-            _doctorsVisitedCount = patients[_phone].doctorsVisitedCount;
+            // _patientId = patients[_phone].patientId;
+            // _name = patients[_phone].patientName;
+            // _email = patients[_phone].email;
+            // _doctorsVisitedCount = patients[_phone].doctorsVisitedCount;
             // uint[] memory pris = new uint[](patients[_phone].doctorsVisitedCount);
             // for(uint i = 0;i<patients[_phone].doctorsVisitedCount;i++){
             //         pris[i] = patients[_phone].prescription[i];
             // }
             // _prescription = pris;
-            // bool flag = false;
-            // for(uint i = 0;i<patients[_phone].doctorsVisitedCount;i++){
-            //     if(patients[_phone].doctorsVisited[i] == msg.sender)
-            //     {
-            //         flag = true;
-            //     }
-            // }
-            // if(flag){
-            //     _patientId = patients[_phone].patientId;
-            //     _name = patients[_phone].patientName;
-            //     _email =  patients[_phone].email;
-            //     _doctorsVisitedCount = patients[_phone].doctorsVisitedCount;
-            //     uint[] memory pris = new uint[](patients[_phone].doctorsVisitedCount);
-            //     for(i = 0;i<patients[_phone].doctorsVisitedCount;i++){
-            //             pris[i] = patients[_phone].prescription[i];
-            //     }
-            //     _prescription = pris;
-            // }
-            // else if(msg.sender == owner){
-            //     _patientId = patients[_phone].patientId;
-            //     _name = patients[_phone].patientName;
-            //     _email =  patients[_phone].email;
-            //     _doctorsVisitedCount = patients[_phone].doctorsVisitedCount;
-            //     uint[] memory pris_own = new uint[](patients[_phone].doctorsVisitedCount);
-            //     address[] memory docs_own = new address[](patients[_phone].doctorsVisitedCount);
-            //     for(uint l = 0;l<patients[_phone].doctorsVisitedCount;l++){
-            //             pris_own[l] = patients[_phone].prescription[l];
-            //     }
-            //     _prescription = pris_own;
-            //     for(uint j = 0;j<patients[_phone].doctorsVisitedCount;j++){
-            //             docs_own[j] = patients[_phone].doctorsVisited[j];
-            //     }
-            //     _doctorsVisited = docs_own; 
-            // }
+            bool flag = false;
+            for(uint i = 0;i<patients[_phone].doctorsVisitedCount;i++){
+                if(patients[_phone].doctorsVisited[i] == msg.sender)
+                {
+                    flag = true;
+                }
+            }
+            if(flag){
+                _patientId = patients[_phone].patientId;
+                _name = patients[_phone].patientName;
+                _email = patients[_phone].email;
+                _doctorsVisitedCount = patients[_phone].doctorsVisitedCount;
+                uint[] memory pris = new uint[](patients[_phone].doctorsVisitedCount);
+                for(i = 0;i<patients[_phone].doctorsVisitedCount;i++){
+                        pris[i] = patients[_phone].prescription[i];
+                }
+                _prescription = pris;
+            }
+            else if(msg.sender == owner){
+                _patientId = patients[_phone].patientId;
+                _name = patients[_phone].patientName;
+                _email = patients[_phone].email;
+                _doctorsVisitedCount = patients[_phone].doctorsVisitedCount;
+                uint[] memory pris_own = new uint[](patients[_phone].doctorsVisitedCount);
+                address[] memory docs_own = new address[](patients[_phone].doctorsVisitedCount);
+                for(uint l = 0;l<patients[_phone].doctorsVisitedCount;l++){
+                        pris_own[l] = patients[_phone].prescription[l];
+                }
+                _prescription = pris_own;
+                for(uint j = 0;j<patients[_phone].doctorsVisitedCount;j++){
+                        docs_own[j] = patients[_phone].doctorsVisited[j];
+                }
+                _doctorsVisited = docs_own; 
+            }
+        }
+        else{
+            _patientId = 0;
+            _name = "null";
+            _email = "null";
+            _doctorsVisitedCount = 0;
         }
     }
 }
