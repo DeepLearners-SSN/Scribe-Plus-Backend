@@ -1,7 +1,7 @@
 version: "3"
 services: 
     ganache:
-        image: jayvishaalj/ganache
+        image: cloud.canister.io:5000/jayvishaallj/scribe-ganache
         # build: 
         #     context: .
         #     dockerfile: Dockerfile.ganache
@@ -16,14 +16,14 @@ services:
             - mongo_store:/data/lib/
     
     flask:
-        image: jayvishaalj/scribeplus
+        image: cloud.canister.io:5000/jayvishaallj/scribe-flask-server
         # build: flask_server/.
         ports: 
             - "5000:5000"
             - "5001:5001"
     
     nodeserver:
-        image: jayvishaalj/testrepo
+        image: cloud.canister.io:5000/jayvishaallj/scribe-node-server
         # build: node_server/.
         # command: nodemon -L  --ignore 'build/*.json' app.js 
         ports: 
