@@ -39,7 +39,7 @@ def home():
     return jsonify({"message": "BASE FLASK URL"})
 
 
-@app.route('/api/model/<message>')
+@app.route('/api/test/<message>')
 def model(message):
     socketio.emit(message, {'data': 42})
     return jsonify({"message": "running socket to emit message"})
@@ -50,8 +50,9 @@ def modelProcess():
     data = request.json
     socketId = data['doctor']['filename'][:-5]
     print(socketId, file=sys.stderr)
+    socketio.emit('message', data)
     nerDict = doNer.doNer(data['doctor']['doc']['item'])
-    socketio.emit(socketId, jsonify(nerDict))
+    socketio.emit(socketId, nerDict)
     return jsonify({
         "message": "running socket to emit message",
         "sockId": socketId

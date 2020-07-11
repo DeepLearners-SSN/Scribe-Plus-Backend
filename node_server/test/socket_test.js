@@ -1,6 +1,6 @@
 const io = require("socket.io-client");
 
-let socket = io.connect("http://13.234.75.104:5000/");
+let socket = io.connect("http://192.168.99.100:5000/");
 
 socket.on('message',(data) => {
     console.log("recieved : ",data);
