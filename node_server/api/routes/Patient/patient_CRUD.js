@@ -1,28 +1,32 @@
 const express = require('express');
 const router = express();
-const { createPatient,getPatient,patientCount } = require("../Blockchain/connection/handlers.js");
+const { createPatient, getPatient, patientCount } = require("../Blockchain/connection/handlers.js");
 const { sendOTP } = require("../../middleware/sendMessage.js");
+const { patientSchema, patientDetailSchema } = require('./patient_schema');
+
+
+
 
 //helper  Function
 function makeQrCode(length) {
-    var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
-       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
- }
+}
 
- function makeOTP(length) {
-    var result           = '';
-    var characters       = '0123456789';
+function makeOTP(length) {
+    var result = '';
+    var characters = '0123456789';
     var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
-       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
- }
+}
 
 
 
@@ -42,9 +46,9 @@ function makeQrCode(length) {
  *                          count:
  *                              type: string
  */
-router.get('/count',async(req,res,next) => {
+router.get('/count', async (req, res, next) => {
     const count = await patientCount();
-    res.status(200).json({count:count});
+    res.status(200).json({ count: count });
 });
 
 /**
@@ -89,20 +93,24 @@ router.get('/count',async(req,res,next) => {
  *                                      type: string
  *          
  */
-router.post('/create',(req,res,next) => {
-    try{
-        console.log("CREATE PATIENT API CALLED",req.body);
-    const patientQrCode = makeQrCode(16);
-    console.log(patientQrCode);
-    createPatient(req.body.name, req.body.phno, req.body.email, patientQrCode).then((account) => {
-        console.log("ACCOUNT PAT : ", account);
-        res.status(200).json({message:"patient added!",result:account});
-    });
+router.post('/create', (req, res, next) => {
+    try {
+        const { error } = patientSchema.validate(req.body);
+        if (error) {
+            return res.status(400).json({ error: error.details[0].message });
+        }
+        console.log("CREATE PATIENT API CALLED", req.body);
+        const patientQrCode = makeQrCode(16);
+        console.log(patientQrCode);
+        createPatient(req.body.name, req.body.phno, req.body.email, patientQrCode).then((account) => {
+            console.log("ACCOUNT PAT : ", account);
+            res.status(200).json({ message: "patient added!", result: account });
+        });
     }
-    catch(e){
-        res.status(400).json({message:"Wrong details!"});
+    catch (e) {
+        res.status(400).json({ message: "Wrong details!" });
     }
-    
+
 });
 
 
@@ -146,28 +154,32 @@ router.post('/create',(req,res,next) => {
  *                                  email:
  *                                      type: string          
  */
-router.post('/details',(req,res,next)=> {
-    try{
-        console.log("GET PAT : ",req.body);
-    getPatient(req.body.patientQrCode,req.body.address).then((patient) => {
-        console.log("PAT : ",patient);
-        if(patient[1] === "null"){
-            res.status(404).json({patient:"not found"});
+router.post('/details', (req, res, next) => {
+    try {
+        const { error } = patientDetailSchema.validate(req.body);
+        if (error) {
+            return res.status(400).json({ error: error.details[0].message });
         }
-        else if(patient[1] === "newDoctor"){
-            const OTP = makeOTP(6);
-            console.log("OTP FOR PAT : ",req.body.patientQrCode," is : ", OTP,"SEND TO : ",patient[3]);
-            sendOTP(patient[3],OTP).then(() => {
-                res.status(401).json({OTP:OTP});
-            });
-        }
-        else{
-            res.status(200).json({patient:patient});
-        }
-    })
-    }catch(e){
-        res.status(400).json({message:"ERROR",eror:e});
-    }   
+        console.log("GET PAT : ", req.body);
+        getPatient(req.body.patientQrCode, req.body.address).then((patient) => {
+            console.log("PAT : ", patient);
+            if (patient[1] === "null") {
+                res.status(404).json({ patient: "not found" });
+            }
+            else if (patient[1] === "newDoctor") {
+                const OTP = makeOTP(6);
+                console.log("OTP FOR PAT : ", req.body.patientQrCode, " is : ", OTP, "SEND TO : ", patient[3]);
+                sendOTP(patient[3], OTP).then(() => {
+                    res.status(401).json({ OTP: OTP });
+                });
+            }
+            else {
+                res.status(200).json({ patient: patient });
+            }
+        })
+    } catch (e) {
+        res.status(400).json({ message: "ERROR", eror: e });
+    }
 });
 
 
