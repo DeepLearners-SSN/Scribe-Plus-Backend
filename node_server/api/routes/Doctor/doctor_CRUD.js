@@ -202,7 +202,6 @@ router.post('/login',async (req,res,next) => {
 router.get('/count',async (req,res,next) => {
     const message = await getDocCount();
     res.status(200).json({message:message});
-
 });
 
 module.exports = router;

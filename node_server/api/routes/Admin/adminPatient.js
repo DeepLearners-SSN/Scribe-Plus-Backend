@@ -41,11 +41,17 @@ const { getPatientForAdmin } = require("../Blockchain/connection/handlers.js");
  *                                      type: string          
  */
 router.post('/details',(req,res,next)=> {
-    console.log("GET PAT : ",req.body);
+    try{
+        console.log("GET PAT : ",req.body);
     getPatientForAdmin(req.body.patientQrCode,req.body.address).then((patient) => {
         console.log("PAT : ",patient);
         res.status(200).json({patient:patient});
     });
+    }
+    catch(e){
+        res.status(400).json({message:"Bad Request"});
+    }
+    
 });
 
 
