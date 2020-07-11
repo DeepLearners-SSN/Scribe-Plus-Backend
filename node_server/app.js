@@ -7,6 +7,8 @@ const { auth } = require('./api/middleware/auth.js');
 const router = require('./api/routes/router.js');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+var cors = require('cors');
+
 
 
 
@@ -36,6 +38,7 @@ const app = express();
 const PORT = process.env.PORT ||3000 ;
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }));
+app.use(cors());
 
 const swaggerOptions = {
     swaggerDefinition : {

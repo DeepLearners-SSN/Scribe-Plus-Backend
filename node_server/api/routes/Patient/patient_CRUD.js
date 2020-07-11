@@ -90,13 +90,19 @@ router.get('/count',async(req,res,next) => {
  *          
  */
 router.post('/create',(req,res,next) => {
-    console.log("CREATE PATIENT API CALLED",req.body);
+    try{
+        console.log("CREATE PATIENT API CALLED",req.body);
     const patientQrCode = makeQrCode(16);
     console.log(patientQrCode);
     createPatient(req.body.name, req.body.phno, req.body.email, patientQrCode).then((account) => {
         console.log("ACCOUNT PAT : ", account);
         res.status(200).json({message:"patient added!",result:account});
     });
+    }
+    catch(e){
+        res.status(400).json({message:"Wrong details!"});
+    }
+    
 });
 
 
@@ -141,7 +147,8 @@ router.post('/create',(req,res,next) => {
  *                                      type: string          
  */
 router.post('/details',(req,res,next)=> {
-    console.log("GET PAT : ",req.body);
+    try{
+        console.log("GET PAT : ",req.body);
     getPatient(req.body.patientQrCode,req.body.address).then((patient) => {
         console.log("PAT : ",patient);
         if(patient[1] === "null"){
@@ -158,6 +165,9 @@ router.post('/details',(req,res,next)=> {
             res.status(200).json({patient:patient});
         }
     })
+    }catch(e){
+        res.status(400).json({message:"ERROR",eror:e});
+    }   
 });
 
 
