@@ -3,9 +3,9 @@ const fs = require('fs-extra');
 const Web3 = require('web3');
 const path = require('path');
 
-const web3 = new Web3(new Web3.providers.HttpProvider("http://13.234.64.136:8545"));
+const web3 = new Web3(new Web3.providers.HttpProvider("http://ganache:8545"));
 const eventProvider = new Web3.providers.WebsocketProvider(
-    "ws://13.234.64.136:8545"
+    "ws://ganache:8545"
 );
 web3.setProvider(eventProvider);  
 
@@ -14,9 +14,9 @@ let accounts = web3.eth.getAccounts().then(acc => {return acc});
 const initialize = async() => {
     try{
         console.log("FILE ENTERED");
-    const web3 = new Web3(new Web3.providers.HttpProvider("http://13.234.64.136:8545"));
+    const web3 = new Web3(new Web3.providers.HttpProvider("http://ganache:8545"));
     const eventProvider = new Web3.providers.WebsocketProvider(
-        "ws://13.234.64.136:8545"
+        "ws://ganache:8545"
     );
     
     web3.setProvider(eventProvider);  
