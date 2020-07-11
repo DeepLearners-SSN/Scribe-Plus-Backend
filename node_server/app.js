@@ -141,8 +141,8 @@ app.get('/api',auth,(req,res,next)=>{
 
 
 var server = app.listen(PORT,'0.0.0.0',async ()=> {
-    const address = await deploy();
-    console.log("ADDRESS : ",address);
+    // const address = await deploy();
+    // console.log("ADDRESS : ",address);
     console.log(`SERVER  ON ${PORT}`);
     var host = server.address().address;
     console.log('HOST : ',host);
