@@ -51,13 +51,19 @@ const { createDoctor, getDoctor, getDocCount } = require('../Blockchain/connecti
  *          
  */
 router.post('/create',async (req,res,next) => {
-    console.log("CREATE DOCTOR API CALLED",req.body);
-    const password= await bcrypt.hash(req.body.password,10);
-    console.log("PASSWORD ",password);
-    createDoctor(req.body.name,req.body.phno,req.body.email,password).then(account => {
-        console.log("ACCOUNT : ",account);
-        res.status(200).json({message:"doctor added!",result:account});
-    });
+    try{
+        console.log("CREATE DOCTOR API CALLED",req.body);
+        const password= await bcrypt.hash(req.body.password,10);
+        console.log("PASSWORD ",password);
+        createDoctor(req.body.name,req.body.phno,req.body.email,password).then(account => {
+            console.log("ACCOUNT : ",account);
+            res.status(200).json({message:"doctor added!",result:account});
+        });
+    }
+    catch(e){
+        res.status(400).json({message:"wrong details"});
+    }
+    
     
 });
 
@@ -100,8 +106,14 @@ router.post('/create',async (req,res,next) => {
  */
 router.post('/details',async (req,res,next) => {
     console.log("DOC DETAIL : ",req.body.address);
-    const doctor = await getDoctor(req.body.address);
+    try{   
+        const doctor = await getDoctor(req.body.address);
     res.status(200).json({doctor:{"name":doctor["1"],"phno":doctor["2"],"doctorId":doctor["0"],"email":doctor["3"]}});
+    }
+    catch(e){
+        res.status(400).json({message:"Wrong Address"});
+    }
+    
 });
 
 
@@ -145,7 +157,8 @@ router.post('/details',async (req,res,next) => {
  *                              type: string
  */
 router.post('/login',async (req,res,next) => {
-    console.log("LOGIN DOC : ",req.body);
+    try{
+        console.log("LOGIN DOC : ",req.body);
     const doctor = await getDoctor(req.body.address);
     const validPass = await bcrypt.compare(req.body.password,doctor["4"]);
     if(validPass){
@@ -155,6 +168,11 @@ router.post('/login',async (req,res,next) => {
     else{
         return res.status(401).json({message:"Unotherized! wrong password"});
     }
+    }
+    catch(e){
+        res.status(400).json({message:"Wrong Creds"});
+    }
+    
     
 });
 
