@@ -1,6 +1,29 @@
 const express = require('express');
 const router = express();
 const { createPatient,getPatient,patientCount } = require("../Blockchain/connection/handlers.js");
+const { sendOTP } = require("../../middleware/sendMessage.js");
+
+//helper  Function
+function makeQrCode(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+ }
+
+ function makeOTP(length) {
+    var result           = '';
+    var characters       = '0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+ }
+
 
 
 /**
@@ -68,7 +91,9 @@ router.get('/count',async(req,res,next) => {
  */
 router.post('/create',(req,res,next) => {
     console.log("CREATE PATIENT API CALLED",req.body);
-    createPatient(req.body.name,req.body.phno,req.body.email).then((account) => {
+    const patientQrCode = makeQrCode(16);
+    console.log(patientQrCode);
+    createPatient(req.body.name, req.body.phno, req.body.email, patientQrCode).then((account) => {
         console.log("ACCOUNT PAT : ", account);
         res.status(200).json({message:"patient added!",result:account});
     });
@@ -90,10 +115,10 @@ router.post('/create',(req,res,next) => {
  *         schema :
  *              type: object
  *              required:
- *                  - phone
+ *                  - patientQrCode
  *                  - address
  *              properties:
- *                  phone:
+ *                  patientQrCode:
  *                      type: string
  *                  address:
  *                      type: string
@@ -103,23 +128,37 @@ router.post('/create',(req,res,next) => {
  *             schema:
  *                  type: object
  *                  properties:
- *                          doctor:
+ *                          patient:
  *                              type: object
  *                              properties:
  *                                  name:
  *                                      type: string
  *                                  phno:
  *                                      type: string
- *                                  doctorId:
+ *                                  patientId:
  *                                      type: string
  *                                  email:
  *                                      type: string          
  */
 router.post('/details',(req,res,next)=> {
     console.log("GET PAT : ",req.body);
-    getPatient(req.body.phone,req.body.address).then((patient) => {
+    getPatient(req.body.patientQrCode,req.body.address).then((patient) => {
         console.log("PAT : ",patient);
-        res.status(200).json({patient:patient});
+        if(patient[1] === "null"){
+            res.status(404).json({patient:"not found"});
+        }
+        else if(patient[1] === "newDoctor"){
+            const OTP = makeOTP(6);
+            console.log("OTP FOR PAT : ",req.body.patientQrCode," is : ", OTP,"SEND TO : ",patient[3]);
+            sendOTP(patient[3],OTP).then(() => {
+                res.status(401).json({OTP:OTP});
+            });
+        }
+        else{
+            res.status(200).json({patient:patient});
+        }
     })
 });
+
+
 module.exports = router;

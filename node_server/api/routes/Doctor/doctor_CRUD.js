@@ -3,7 +3,7 @@ const express = require('express');
 const router = express();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { createDoctor,getDoctor } = require('../Blockchain/connection/handlers.js');
+const { createDoctor, getDoctor, getDocCount } = require('../Blockchain/connection/handlers.js');
 
 /**
  * @swagger
@@ -157,4 +157,34 @@ router.post('/login',async (req,res,next) => {
     }
     
 });
+
+/**
+ * @swagger
+ * /api/doctor/count:
+ *   get:
+ *      tags:
+ *          - doctor
+ *      description: Returns the count of doctors registered in the blockchain
+ *      parameters:
+ *       - name: auth-token
+ *         description: auth token got from  login.
+ *         in: header
+ *         type: string
+ *      responses:
+ *          200:
+ *             description: A json containing a message
+ *             schema:
+ *                  type: object
+ *                  properties:
+ *                          message:
+ *                              type: string
+ *          401:
+ *              description: Access Denied
+ */
+router.get('/count',async (req,res,next) => {
+    const message = await getDocCount();
+    res.status(200).json({message:message});
+
+});
+
 module.exports = router;

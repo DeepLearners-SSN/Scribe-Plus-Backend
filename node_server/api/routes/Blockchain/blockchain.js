@@ -4,34 +4,6 @@ const jwt = require('jsonwebtoken');
 const { getDocCount } = require('./connection/handlers.js');
 const { auth } = require('../../middleware/auth.js');
 
-/**
- * @swagger
- * /api/blockchain/doctor/count:
- *   get:
- *      tags:
- *          - blockchain
- *      description: Returns the count of doctors registered in the blockchain
- *      parameters:
- *       - name: auth-token
- *         description: auth token got from  login.
- *         in: header
- *         type: string
- *      responses:
- *          200:
- *             description: A json containing a message
- *             schema:
- *                  type: object
- *                  properties:
- *                          message:
- *                              type: string
- *          401:
- *              description: Access Denied
- */
-router.get('/doctor/count',async (req,res,next) => {
-    const message = await getDocCount();
-    res.status(200).json({message:message});
-
-});
 
 /**
  * @swagger
@@ -59,6 +31,7 @@ router.get('/doctor/count',async (req,res,next) => {
  *                      type: string
  *                  user:
  *                      type: string
+ *     deprecated: true
  *              
  */
 
