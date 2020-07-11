@@ -29,6 +29,7 @@
     "swagger-jsdoc": "^4.0.0",
     "swagger-ui": "^3.27.0",
     "swagger-ui-express": "^4.1.4",
+    "unirest": "^0.6.0",
     "web3": "^1.2.9"
   }
 }

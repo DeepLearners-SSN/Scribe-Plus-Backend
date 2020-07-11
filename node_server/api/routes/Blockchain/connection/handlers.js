@@ -9,6 +9,13 @@ const getContractObject = () => {
     return new web3.eth.Contract(JSON.parse(compiledContract.interface),contractReceipt.address);
 }
 
+const getAccounts = () => {
+   return  web3.eth.getAccounts().then(async (accounts) => {
+       return accounts;
+   });
+}
+
+
 const getMessage = async() => {
     const contractObject = getContractObject();
     const accounts = await web3.eth.getAccounts();
@@ -23,7 +30,7 @@ const getMessage = async() => {
 const createDoctor = async(name, phno, email, password) =>{
     console.log("CREATE DOCTOR : ",name,phno,email,password);
     const count = await getDocCount();
-    const id = (parseInt(count,10) + 1) * 2;
+    const id = (parseInt(count,10) + 1);
     const contractObject = getContractObject();
     return web3.eth.getAccounts().then(async (accounts) => {
         let hash = {}
@@ -58,27 +65,27 @@ const getPatCount  = async() => {
     return await contractObject.methods.patientCount().call().then((c) => { return c });
 }
 
-const createPatient = async(name, phno, email) =>{
+const createPatient = async(name, phno, email, patientQrCode) =>{
     console.log("CREATE PATIENT : ",name,phno,email);
     const contractObject = getContractObject();
     return web3.eth.getAccounts().then(async (accounts) => {
         let hash = {}
         console.log(accounts[0]);
-        await  contractObject.methods.addPatient(name, phno, email).send({from:accounts[0],gas:'1000000'},(err,thash) => {
+        await  contractObject.methods.addPatient(name, phno, email, patientQrCode).send({from:accounts[0],gas:'1000000'},(err,thash) => {
             console.log(thash,phno);
             hash = thash;
             });
-        return {account:phno,hash:hash};
+        return {account:patientQrCode,hash:hash};
     });
 }
 
-const getPatient = async(phone,address) =>{
-    console.log("GET PATIENT : ",phone);
+const getPatient = async(patientQrCode,address) =>{
+    console.log("GET PATIENT : ",patientQrCode);
     const contractObject = getContractObject();
     try{
-        await  contractObject.methods.getPatient(phone).call({from:accounts[0]}).then((patient) => {
+        return await  contractObject.methods.getPatient(patientQrCode).call({from:address}).then((patient) => {
             console.log("PAT : ",patient);
-            return result;
+            return patient;
         });
         
 
@@ -89,6 +96,25 @@ const getPatient = async(phone,address) =>{
     
 }
 
+
+const getPatientForAdmin = async(patientQrCode,address) =>{
+    console.log("GET PATIENT : ",patientQrCode);
+    const contractObject = getContractObject();
+    try{
+        return web3.eth.getAccounts().then(async (accounts) => {
+            return await contractObject.methods.getPatient(patientQrCode).call({from:accounts[0]}).then((patient) => {
+                console.log("PAT : ",patient);
+                return {id:patient[0], name:patient[1], email:patient[2], phone:patient[3], doctorVisited:patient[4], doctorsVisited:patient[6]};
+            });     
+        });
+   }
+    catch(e){
+        return e;
+    }
+    
+}
+
+module.exports.getAccounts = getAccounts;
 module.exports.getMessage = getMessage;
 module.exports.getDocCount = getDocCount;
 module.exports.createDoctor = createDoctor;
@@ -96,3 +122,4 @@ module.exports.getDoctor = getDoctor;
 module.exports.createPatient = createPatient;
 module.exports.getPatient = getPatient;
 module.exports.patientCount = getPatCount;
+module.exports.getPatientForAdmin = getPatientForAdmin;

@@ -5,6 +5,7 @@ import string
 from flask_socketio import SocketIO
 import sys
 
+import doNer
 
 async_mode = None
 
@@ -13,20 +14,21 @@ app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode=async_mode, ping_timeout=10000)
 
 
-
-#helper functions 
+#helper functions
 def randomString(stringLength=8):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
 
+
 def handle_disconnect():
     print('disconnected', file=sys.stderr)
+
 
 @socketio.on('connect')
 def handle_message():
     print('received socket', file=sys.stderr)
-    socketio.emit('message',{'data':'12'})
-    socketio.on_event('disconnect',handle_disconnect)
+    socketio.emit('message', {'data': '12'})
+    socketio.on_event('disconnect', handle_disconnect)
     return "Connected!!!"
 
 
@@ -34,22 +36,27 @@ def handle_message():
 @app.route('/')
 def home():
     print('BASE URL API ', file=sys.stderr)
-    return jsonify({"message":"BASE FLASK URL"})
+    return jsonify({"message": "BASE FLASK URL"})
+
 
 @app.route('/api/model/<message>')
 def model(message):
     socketio.emit(message, {'data': 42})
-    return jsonify({"message":"running socket to emit message"})
+    return jsonify({"message": "running socket to emit message"})
 
 
-@app.route('/api/model/process',methods=['POST'])
+@app.route('/api/model/process', methods=['POST'])
 def modelProcess():
     data = request.json
     socketId = data['doctor']['filename'][:-5]
     print(socketId, file=sys.stderr)
-    socketio.emit(socketId, data)
-    return jsonify({"message":"running socket to emit message","sockId":socketId})
+    nerDict = doNer.doNer(data['doctor']['doc']['item'])
+    socketio.emit(socketId, jsonify(nerDict))
+    return jsonify({
+        "message": "running socket to emit message",
+        "sockId": socketId
+    })
 
 
 if __name__ == "__main__":
-   socketio.run(app, host='0.0.0.0', port=5000)
+    socketio.run(app, host='0.0.0.0', port=5000)
