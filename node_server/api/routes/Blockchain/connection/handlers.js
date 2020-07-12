@@ -1,5 +1,6 @@
 const fs = require('fs-extra');
 const { web3, accounts } = require('./deploy.js');
+const { prescriptionSchema } = require('../../Patient/patient_schema.js');
 
 
 
@@ -98,9 +99,9 @@ const getPatient = async(patientQrCode,address) =>{
 
 
 const getPatientForAdmin = async(patientQrCode,address) =>{
-    console.log("GET PATIENT : ",patientQrCode);
-    const contractObject = getContractObject();
     try{
+        console.log("GET PATIENT : ",patientQrCode);
+        const contractObject = getContractObject();
         return web3.eth.getAccounts().then(async (accounts) => {
             return await contractObject.methods.getPatient(patientQrCode).call({from:accounts[0]}).then((patient) => {
                 console.log("PAT : ",patient);
@@ -114,6 +115,41 @@ const getPatientForAdmin = async(patientQrCode,address) =>{
     
 }
 
+
+const createPrescription = async(medicines, symptoms, diagnosis, advice, patientQrCode, doctorAddress) => {
+    try{
+        console.log("CREATE PRESCRIPTION : ",patientQrCode);
+        const contractObject = getContractObject();
+        var today = new Date();
+        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+        var dateTime = date+' '+time;
+        let hash = "";
+        await contractObject.methods.createPrescription(medicines,symptoms,diagnosis,advice,dateTime,patientQrCode).send({from:doctorAddress,gas:'1000000'},(err,thash) => {
+            console.log("PRESCRIPTION",thash);
+            hash = thash;
+            });
+        return {hash:hash};
+    }
+    catch(e){
+        return { error:e };
+    }
+}
+
+const getPrescription = async (prescriptionId, patientQrCode, doctorAddress) => {
+    try{
+        console.log("GET PRESCRIPTION : ",prescriptionId);
+        const contractObject = getContractObject();
+        return await contractObject.methods.getPrescription(prescriptionId, patientQrCode).call({from:doctorAddress}).then((prescription) => {
+            console.log("PRESCRIPTION : ",prescription);
+            return {prescriptionId:prescription["0"], medicines: prescription["1"], symptoms:prescription["2"], diagnosis:prescription["3"], advice:prescription["4"], date:prescription["5"], doctorName:prescription["6"]};
+        });
+    }
+    catch(e){
+        return { error:e } ;
+    }
+}
+
 module.exports.getAccounts = getAccounts;
 module.exports.getMessage = getMessage;
 module.exports.getDocCount = getDocCount;
@@ -123,3 +159,5 @@ module.exports.createPatient = createPatient;
 module.exports.getPatient = getPatient;
 module.exports.patientCount = getPatCount;
 module.exports.getPatientForAdmin = getPatientForAdmin;
+module.exports.createPrescription = createPrescription;
+module.exports.getPrescription = getPrescription;

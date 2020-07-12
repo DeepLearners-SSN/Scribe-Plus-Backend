@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express();
-const { createPatient, getPatient, patientCount } = require("../Blockchain/connection/handlers.js");
+const { createPatient, getPatient, patientCount, getPrescription } = require("../Blockchain/connection/handlers.js");
 const { sendOTP } = require("../../middleware/sendMessage.js");
 const { patientSchema, patientDetailSchema } = require('./patient_schema');
+const { auth } = require('../../middleware/auth.js');
 
 
 
@@ -61,6 +62,10 @@ router.get('/count', async (req, res, next) => {
  *      consumes:
  *       - application/json
  *      parameters:
+ *       - name: auth-token
+ *         description: auth token got from  login.
+ *         in: header
+ *         type: string
  *       - in: body
  *         name: patient
  *         schema :
@@ -93,7 +98,7 @@ router.get('/count', async (req, res, next) => {
  *                                      type: string
  *          
  */
-router.post('/create', (req, res, next) => {
+router.post('/create',auth, (req, res, next) => {
     try {
         const { error } = patientSchema.validate(req.body);
         if (error) {
@@ -124,6 +129,10 @@ router.post('/create', (req, res, next) => {
  *      consumes:
  *       - application/json
  *      parameters:
+ *       - name: auth-token
+ *         description: auth token got from  login.
+ *         in: header
+ *         type: string
  *       - in: body
  *         name: doctor
  *         schema :
@@ -147,21 +156,49 @@ router.post('/create', (req, res, next) => {
  *                              properties:
  *                                  name:
  *                                      type: string
- *                                  phno:
- *                                      type: string
- *                                  patientId:
+ *                                  id:
  *                                      type: string
  *                                  email:
- *                                      type: string          
+ *                                      type: string
+ *                                  phno:
+ *                                      type: string
+ *                                  doctorsVisitedCount:
+ *                                      type: string
+ *                                  prescriptions:
+ *                                      type: array
+ *                                      items:
+ *                                          $ref: "#/definitions/Prescription"                          
+ * 
+ * 
+ * definitions:
+ *          Prescription:
+ *            type: object
+ *            properties:
+ *              prescriptionId:
+ *                  type: string
+ *              medicines:
+ *                  type: string
+ *              symptoms:
+ *                  type: string
+ *              diagnosis:
+ *                  type: string   
+ *              advice:
+ *                  type: string
+ *              date:
+ *                  type: string
+ *              doctorName:
+ *                  type: string
+ * 
+ *           
  */
-router.post('/details', (req, res, next) => {
+router.post('/details',auth,(req, res, next) => {
     try {
         const { error } = patientDetailSchema.validate(req.body);
         if (error) {
             return res.status(400).json({ error: error.details[0].message });
         }
         console.log("GET PAT : ", req.body);
-        getPatient(req.body.patientQrCode, req.body.address).then((patient) => {
+        getPatient(req.body.patientQrCode, req.body.address).then(async(patient) => {
             console.log("PAT : ", patient);
             if (patient[1] === "null") {
                 res.status(404).json({ patient: "not found" });
@@ -174,7 +211,13 @@ router.post('/details', (req, res, next) => {
                 });
             }
             else {
-                res.status(200).json({ patient: patient });
+                let responseJson = {name:patient["1"], id:patient["0"], email:patient["2"], phone:patient["3"], doctorsVisitedCount:patient["4"], prescriptions:[]}
+                for(let i=0;i<parseInt(patient["4"]);i++){
+                    await getPrescription(patient["5"][i], req.body.patientQrCode, req.body.address).then((prescription) => {
+                        responseJson.prescriptions.push(prescription);
+                    });
+                }
+                return res.status(200).json({ patient: responseJson });
             }
         })
     } catch (e) {

@@ -31,6 +31,7 @@ contract Scribe {
         string diagnosis;
         string advice;
         string date;
+        address doctor;
     }
 
     mapping(address=>Doctor)  doctors;
@@ -81,15 +82,6 @@ contract Scribe {
 
     function getPatient(string memory _patientQrCode) public view returns (uint _patientId, string memory _name, string memory _email, string memory _phone, uint _doctorsVisitedCount, uint[] memory _prescription, address[] memory  _doctorsVisited){
         if(patientExists[_patientQrCode]){
-            // _patientId = patients[_phone].patientId;
-            // _name = patients[_phone].patientName;
-            // _email = patients[_phone].email;
-            // _doctorsVisitedCount = patients[_phone].doctorsVisitedCount;
-            // uint[] memory pris = new uint[](patients[_phone].doctorsVisitedCount);
-            // for(uint i = 0;i<patients[_phone].doctorsVisitedCount;i++){
-            //         pris[i] = patients[_phone].prescription[i];
-            // }
-            // _prescription = pris;
             bool flag = false;
             for(uint i = 0;i<patients[_patientQrCode].doctorsVisitedCount;i++){
                 if(patients[_patientQrCode].doctorsVisited[i] == msg.sender)
@@ -139,6 +131,45 @@ contract Scribe {
             _name = "null";
             _email = "null";
             _doctorsVisitedCount = 0;
+        }
+    }
+
+    function createPrescription(string memory _medicines, string memory _symptoms, string memory _diagnosis, string memory _advice, string memory _date, string memory _patientQrCode) public {
+        if(patientExists[_patientQrCode]){
+            if(doctorExists[msg.sender]){
+                prescriptionCount++;
+                prescriptions[prescriptionCount] = Prescription(prescriptionCount, _medicines, _symptoms, _diagnosis, _advice, _date, msg.sender);
+                patients[_patientQrCode].doctorsVisitedCount += 1;
+                patients[_patientQrCode].doctorsVisited.push(msg.sender);
+                patients[_patientQrCode].prescription.push(prescriptionCount);
+            }
+        }
+    }
+
+    function getPrescription(uint prescriptionId,string memory _patientQrCode) public view returns (uint _prescriptionId, string memory _medicines, string memory _symptoms, string memory _diagnosis, string memory _advice, string memory _date, string memory _doctorName){
+        if(patientExists[_patientQrCode]){
+            bool flag = false;
+            for(uint i = 0;i<patients[_patientQrCode].doctorsVisitedCount;i++){
+                if(patients[_patientQrCode].doctorsVisited[i] == msg.sender)
+                {
+                    flag = true;
+                }
+            }
+            if(flag){
+                _prescriptionId = prescriptionId;
+                _medicines = prescriptions[prescriptionId].medicines;
+                _symptoms = prescriptions[prescriptionId].symptoms;
+                _diagnosis = prescriptions[prescriptionId].diagnosis;
+                _advice = prescriptions[prescriptionId].advice;
+                _date = prescriptions[prescriptionId].date;
+                _doctorName = doctors[msg.sender].doctorName;
+            }
+            else{
+                _doctorName = "Verify OTP first!";
+            }
+        }
+        else{
+            _doctorName = "Patient Does Not Exist";
         }
     }
 }

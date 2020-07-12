@@ -13,6 +13,10 @@ const { getPatientForAdmin } = require("../Blockchain/connection/handlers.js");
  *      consumes:
  *       - application/json
  *      parameters:
+ *       - name: auth-token
+ *         description: auth token got from  login.
+ *         in: header
+ *         type: string
  *       - in: body
  *         name: doctor
  *         schema :

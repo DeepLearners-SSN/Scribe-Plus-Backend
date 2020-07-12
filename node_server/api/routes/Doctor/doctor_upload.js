@@ -3,6 +3,7 @@ const router = express();
 const multer = require("multer");
 const AWS = require('aws-sdk');
 const multerS3 = require('multer-s3');
+const { auth } = require("../../middleware/auth");
 // const ID = 'AKIA4BGGYS5LC5IFN4PK';
 // const SECRET = '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';
 const ID = 'AKIA4BGGYS5LJXQVN53J';
@@ -34,6 +35,10 @@ var upload = multer({
  *      consumes:
  *          - multipart/formData
  *      parameters:
+ *       - name: auth-token
+ *         description: auth token got from  login.
+ *         in: header
+ *         type: string
  *       - name: file
  *         description: audio to be uploaded
  *         in: formData
@@ -51,7 +56,7 @@ var upload = multer({
  *                              type: string
  *          
  */
-router.post("/audio",upload.single("file"),async (req,res,next) => {
+router.post("/audio", auth ,upload.single("file"),async (req,res,next) => {
   console.log("BODY",req.file);
   const transcriber = new AWS.TranscribeService({ region: "us-west-2" });
   const params = {
