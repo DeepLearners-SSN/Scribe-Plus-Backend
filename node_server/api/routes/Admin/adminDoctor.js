@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express();
 const { getDocCount,getDoctor,getAccounts } = require("../Blockchain/connection/handlers.js");
+const { auth } = require('../../middleware/auth.js');
 
 
 /**
@@ -12,6 +13,11 @@ const { getDocCount,getDoctor,getAccounts } = require("../Blockchain/connection/
  *      description: to get the list  of all doctors
  *      consumes:
  *       - application/json
+ *      parameters:
+ *       - name: auth-token
+ *         description: auth token got from  login.
+ *         in: header
+ *         type: string
  *      responses:
  *          200:
  *             description: A doctor exist and the details of the doctor are returned 
@@ -32,7 +38,7 @@ const { getDocCount,getDoctor,getAccounts } = require("../Blockchain/connection/
  *              email:
  *                  type: string  
  */
-router.get('/list',async (req,res,next)=> {
+router.get('/list', auth ,async (req,res,next)=> {
     let doctorList = [];
     getDocCount().then(async (count) => {
         console.log("DOC COUNT : ",count);
@@ -44,7 +50,8 @@ router.get('/list',async (req,res,next)=> {
             for(let i=1;i<=count;i++){
                 console.log(accounts[i]);
                 await getDoctor(accounts[i]).then((doctor) => {
-                    doctorList.push(doctor);
+                    const docJson = {name:doctor["1"], id:doctor["0"], phone:doctor["2"], email:doctor["3"]};
+                    doctorList.push(docJson);
                 });
             }
             console.log("DOCTORS : ",doctorList);

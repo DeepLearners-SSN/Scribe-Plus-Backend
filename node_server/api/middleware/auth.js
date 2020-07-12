@@ -7,6 +7,7 @@ module.exports.auth = function auth(req,res,next){
     
     try{
         const verified = jwt.verify(token,"jayvishaalj");
+        console.log(verified);
         req.user = verified;
         next();
     }catch(err){

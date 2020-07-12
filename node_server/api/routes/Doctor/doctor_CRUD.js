@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { createDoctor, getDoctor, getDocCount } = require('../Blockchain/connection/handlers.js');
 const { doctorSchema, doctorLoginSchema } = require('./doctor_schema');
+const { auth } = require('../../middleware/auth.js');
 
 
 
@@ -17,6 +18,10 @@ const { doctorSchema, doctorLoginSchema } = require('./doctor_schema');
  *      consumes:
  *       - application/json
  *      parameters:
+ *       - name: auth-token
+ *         description: auth token got from  login.
+ *         in: header
+ *         type: string
  *       - in: body
  *         name: doctor
  *         schema :
@@ -35,6 +40,7 @@ const { doctorSchema, doctorLoginSchema } = require('./doctor_schema');
  *                      type: string
  *                  password:
  *                      type: string
+ *                      minLength: 8
  *      responses:
  *          200:
  *             description: A json containing a the details of the address of the doctor
@@ -52,7 +58,7 @@ const { doctorSchema, doctorLoginSchema } = require('./doctor_schema');
  *                                      type: string
  *          
  */
-router.post('/create', async (req, res, next) => {
+router.post('/create',auth, async (req, res, next) => {
     try {
         const { error } = doctorSchema.validate(req.body);
         if (error) {
@@ -85,6 +91,10 @@ router.post('/create', async (req, res, next) => {
  *      consumes:
  *       - application/json
  *      parameters:
+ *       - name: auth-token
+ *         description: auth token got from  login.
+ *         in: header
+ *         type: string
  *       - in: body
  *         name: doctor
  *         schema :
@@ -112,7 +122,7 @@ router.post('/create', async (req, res, next) => {
  *                                  email:
  *                                      type: string          
  */
-router.post('/details', async (req, res, next) => {
+router.post('/details',auth, async (req, res, next) => {
     console.log("DOC DETAIL : ", req.body.address);
     try {
         const doctor = await getDoctor(req.body.address);
