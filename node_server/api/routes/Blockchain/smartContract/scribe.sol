@@ -22,6 +22,7 @@ contract Scribe {
         string email;
         uint doctorsVisitedCount;
         address[] doctorsVisited;
+        uint prescriptionCountPatient;
         uint[] prescription;
     }
     struct Prescription{
@@ -74,13 +75,14 @@ contract Scribe {
                 patients[_patientQrCode].phone = _phone;
                 patients[_patientQrCode].email = _email;
                 patients[_patientQrCode].doctorsVisitedCount = 0;
+                patients[_patientQrCode].prescriptionCountPatient = 0;
                 patients[_patientQrCode].patientQrCode = _patientQrCode;
                 patientExists[_patientQrCode] = true;
             }
         }
     }
 
-    function getPatient(string memory _patientQrCode) public view returns (uint _patientId, string memory _name, string memory _email, string memory _phone, uint _doctorsVisitedCount, uint[] memory _prescription, address[] memory  _doctorsVisited){
+    function getPatient(string memory _patientQrCode) public view returns (uint _patientId, string memory _name, string memory _email, string memory _phone, uint _doctorsVisitedCount, uint[] memory _prescription, address[] memory  _doctorsVisited, uint _prescriptionCount){
         if(patientExists[_patientQrCode]){
             bool flag = false;
             for(uint i = 0;i<patients[_patientQrCode].doctorsVisitedCount;i++){
@@ -95,8 +97,9 @@ contract Scribe {
                 _email = patients[_patientQrCode].email;
                 _doctorsVisitedCount = patients[_patientQrCode].doctorsVisitedCount;
                 _phone = patients[_patientQrCode].phone;
-                uint[] memory pris = new uint[](patients[_patientQrCode].doctorsVisitedCount);
-                for(i = 0;i<patients[_patientQrCode].doctorsVisitedCount;i++){
+                _prescriptionCount = patients[_patientQrCode].prescriptionCountPatient;
+                uint[] memory pris = new uint[](patients[_patientQrCode].prescriptionCountPatient);
+                for(i = 0;i<patients[_patientQrCode].prescriptionCountPatient;i++){
                         pris[i] = patients[_patientQrCode].prescription[i];
                 }
                 _prescription = pris;
@@ -107,9 +110,10 @@ contract Scribe {
                 _email = patients[_patientQrCode].email;
                 _phone = patients[_patientQrCode].phone;
                 _doctorsVisitedCount = patients[_patientQrCode].doctorsVisitedCount;
-                uint[] memory pris_own = new uint[](patients[_patientQrCode].doctorsVisitedCount);
+                _prescriptionCount = patients[_patientQrCode].prescriptionCountPatient;
+                uint[] memory pris_own = new uint[](patients[_patientQrCode].prescriptionCountPatient);
                 address[] memory docs_own = new address[](patients[_patientQrCode].doctorsVisitedCount);
-                for(i = 0;i<patients[_patientQrCode].doctorsVisitedCount;i++){
+                for(i = 0;i<patients[_patientQrCode].prescriptionCountPatient;i++){
                         pris_own[i] = patients[_patientQrCode].prescription[i];
                 }
                 _prescription = pris_own;
@@ -134,14 +138,56 @@ contract Scribe {
         }
     }
 
-    function createPrescription(string memory _medicines, string memory _symptoms, string memory _diagnosis, string memory _advice, string memory _date, string memory _patientQrCode) public {
+    function checkPermission(string memory _patientQrCode) public view returns (string memory _access){
         if(patientExists[_patientQrCode]){
             if(doctorExists[msg.sender]){
-                prescriptionCount++;
-                prescriptions[prescriptionCount] = Prescription(prescriptionCount, _medicines, _symptoms, _diagnosis, _advice, _date, msg.sender);
+              bool flag = false;
+              for(uint i = 0;i<patients[_patientQrCode].doctorsVisitedCount;i++){
+                    if(patients[_patientQrCode].doctorsVisited[i] == msg.sender)
+                    {
+                        flag = true;
+                    }
+                }
+                if(flag){
+                    _access = "granted";
+                }
+                else{
+                    _access = "nill";
+                }
+            }
+            else{
+                    _access = "nill";
+                }
+        }
+        else
+        {
+            _access = "nill";
+        }
+    }
+
+    function giveDoctorAccessToPatientRecords(string memory _patientQrCode) public {
+        if(patientExists[_patientQrCode]){
+            if(doctorExists[msg.sender]){
                 patients[_patientQrCode].doctorsVisitedCount += 1;
                 patients[_patientQrCode].doctorsVisited.push(msg.sender);
+            }
+        }
+    }
+
+    function createPrescription(string memory _medicines, string memory _symptoms, string memory _diagnosis, string memory _advice, string memory _date, string memory _patientQrCode) public {
+        if(patientExists[_patientQrCode]){
+            bool flag = false;
+            for(uint i = 0;i<patients[_patientQrCode].doctorsVisitedCount;i++){
+                if(patients[_patientQrCode].doctorsVisited[i] == msg.sender)
+                {
+                    flag = true;
+                }
+            }
+            if(flag){
+                prescriptionCount++;
+                prescriptions[prescriptionCount] = Prescription(prescriptionCount, _medicines, _symptoms, _diagnosis, _advice, _date, msg.sender);
                 patients[_patientQrCode].prescription.push(prescriptionCount);
+                patients[_patientQrCode].prescriptionCountPatient += 1;
             }
         }
     }
