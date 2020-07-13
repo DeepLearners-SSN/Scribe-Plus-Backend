@@ -4,7 +4,8 @@ const { createPatient, getPatient, patientCount, getPrescription } = require("..
 const { sendOTP } = require("../../middleware/sendMessage.js");
 const { patientSchema, patientDetailSchema } = require('./patient_schema');
 const { auth } = require('../../middleware/auth.js');
-
+const QRCode  = require('qrcode');
+const { sendMail } = require('../../middleware/sendmail.js');
 
 
 
@@ -83,7 +84,7 @@ router.get('/count', async (req, res, next) => {
  *                      type: string
  *      responses:
  *          200:
- *             description: A json containing a the details of the address of the doctor
+ *             description: A json containing a the details of the QrCode of Patient
  *             schema:
  *                  type: object
  *                  properties:
@@ -109,7 +110,19 @@ router.post('/create',auth, (req, res, next) => {
         console.log(patientQrCode);
         createPatient(req.body.name, req.body.phno, req.body.email, patientQrCode).then((account) => {
             console.log("ACCOUNT PAT : ", account);
-            res.status(200).json({ message: "patient added!", result: account });
+            QRCode.toDataURL(account.account,{scale:10}, function (err, url) {
+                console.log(url);
+                sendMail("PATIENT ","This is the QR Code for the you to show to the doctor for accessing your Prescription history and also Booking appointments",req.body.email,url).then((info,err) =>{
+                    if(err){
+                        console.log("err",err," info ",info);
+                        return res.status(400).json({ message: "Patient added! But QrCode Not Mailed", result: account });
+                    }
+                    else{
+                        return res.status(200).json({ message: "patient added!", result: account });
+                    }
+                });
+              });
+            
         });
     }
     catch (e) {

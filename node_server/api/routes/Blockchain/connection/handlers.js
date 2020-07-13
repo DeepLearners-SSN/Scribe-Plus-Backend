@@ -98,7 +98,7 @@ const getPatient = async(patientQrCode,address) =>{
 }
 
 
-const getPatientForAdmin = async(patientQrCode,address) =>{
+const getPatientForAdmin = async(patientQrCode) =>{
     try{
         console.log("GET PATIENT : ",patientQrCode);
         const contractObject = getContractObject();
