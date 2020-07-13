@@ -7,8 +7,8 @@ module.exports.sendPrescription = async(toEmail, name, medicines, symptoms, diag
     var transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-          user: 'jayvishaalj.01@gmail.com',
-          pass: 'jayvishaal144'
+          user: 'scribeplus.contact@gmail.com',
+          pass: 'deeplearners'
         }
     });
     
@@ -21,7 +21,7 @@ module.exports.sendPrescription = async(toEmail, name, medicines, symptoms, diag
         let pdfData = Buffer.concat(buffers);
 
         let mailOptions = {
-            from: 'jayvishaalj.01@gmail.com',
+            from: 'scribeplus.contact@gmail.com',
             to: toEmail,
             subject: 'Prescription',
             text: 'Prescription for the Doctor Visit ',

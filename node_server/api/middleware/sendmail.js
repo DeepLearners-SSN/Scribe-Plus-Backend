@@ -4,13 +4,13 @@ module.exports.sendMail = async(toName,mailMessageText,toEmail,QrCode) => {
     var transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-          user: 'jayvishaalj.01@gmail.com',
-          pass: 'jayvishaal144'
+          user: 'scribeplus.contact@gmail.com',
+          pass: 'deeplearners'
         }
     });
     
     let mailOptions = {
-        from: 'jayvishaalj.01@gmail.com',
+        from: 'scribeplus.contact@gmail.com',
         to: toEmail,
         subject: toName+'QR CODE',
         text: mailMessageText+'This is unique QR Code do not share this with anyone! ',  
