@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express();
-const { createPrescription,getPrescription } = require("../Blockchain/connection/handlers.js");
+const { createPrescription,getPrescription,getPatientForAdmin, getDoctor } = require("../Blockchain/connection/handlers.js");
 const { prescriptionSchema,getPrescrtiptionSchema } = require('./patient_schema');
 const { auth } = require('../../middleware/auth.js');
+const { sendPrescription } = require('../../middleware/sendPrescription.js');
+
 
 
 /**
@@ -22,7 +24,27 @@ const { auth } = require('../../middleware/auth.js');
  *       - in: body
  *         name: doctor
  *         schema :
- *             $ref: "#/definitions/Prescription"
+ *             type: object
+ *             required: 
+ *                  - medicines
+ *                  - symptoms
+ *                  - diagnosis
+ *                  - advice
+ *                  - patientQrCode
+ *                  - doctorAddress
+ *             properties:
+ *                  medicines:
+ *                      type: string
+ *                  symptoms:
+ *                      type: string
+ *                  diagnosis:
+ *                      type: string
+ *                  advice:
+ *                      type: string
+ *                  patientQrCode:
+ *                      type: string
+ *                  doctorAddress:
+ *                      type: string
  *      responses:
  *          200:
  *             description: A doctor exist and the details of the doctor are returned 
@@ -45,7 +67,20 @@ router.post('/create',auth,async (req,res,next) => {
         console.log("PRESCEIPTOIN API");
         return await createPrescription(req.body.medicines, req.body.symptoms, req.body.diagnosis, req.body.advice, req.body.patientQrCode, req.body.doctorAddress).then((result) => {
             console.log("RESULT : ",result);
-            res.status(200).json(result);
+            getPatientForAdmin(req.body.patientQrCode).then((patient) => {
+                getDoctor(req.body.doctorAddress).then((doctor) => {
+                    sendPrescription(patient.email,patient.name,req.body.medicines, req.body.symptoms, req.body.diagnosis, req.body.advice, doctor["1"], doctor["2"], doctor["3"]).then((info,err) => {
+                        if(err){
+                            console.log("err",err);
+                            return res.status(400).json({message:"Presceiption Created! Not Mailed",result:result});
+                        }
+                        else{
+                            console.log("err",err,"info ",info);
+                            return res.status(200).json({message:"Presceiption Created!",result:result});
+                        }
+                    })
+                });
+            });
         });
     }
     catch(e){

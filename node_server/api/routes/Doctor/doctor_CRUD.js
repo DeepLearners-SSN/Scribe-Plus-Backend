@@ -5,7 +5,8 @@ const jwt = require('jsonwebtoken');
 const { createDoctor, getDoctor, getDocCount } = require('../Blockchain/connection/handlers.js');
 const { doctorSchema, doctorLoginSchema } = require('./doctor_schema');
 const { auth } = require('../../middleware/auth.js');
-
+const QRCode  = require('qrcode');
+const { sendMail } = require('../../middleware/sendmail.js');
 
 
 /**
@@ -70,7 +71,19 @@ router.post('/create',auth, async (req, res, next) => {
             console.log("PASSWORD ", password);
             createDoctor(req.body.name, req.body.phno, req.body.email, password).then(account => {
                 console.log("ACCOUNT : ", account);
-                res.status(200).json({ message: "doctor added!", result: account });
+                QRCode.toDataURL(account.account,{scale:10}, function (err, url) {
+                    console.log(url)
+                    sendMail("DOCTOR ","This is the QR Code for the you to Login intot the app!",req.body.email,url).then((info,err) =>{
+                        if(err){
+                            console.log("err",err," info ",info);
+                            return res.status(400).json({ message: "Doctor added! But QrCode Not Mailed", result: account })
+                           
+                        }
+                        else{
+                            return res.status(200).json({ message: "Doctor added!", result: account });
+                        }
+                    });
+                  });
             });
         }
     }

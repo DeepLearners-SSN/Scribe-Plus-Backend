@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express();
 const { getPatientForAdmin } = require("../Blockchain/connection/handlers.js");
+const { auth } = require('../../middleware/auth.js');
 
 
 /**
@@ -44,10 +45,10 @@ const { getPatientForAdmin } = require("../Blockchain/connection/handlers.js");
  *                                  email:
  *                                      type: string          
  */
-router.post('/details',(req,res,next)=> {
+router.post('/details',auth,(req,res,next)=> {
     try{
         console.log("GET PAT : ",req.body);
-    getPatientForAdmin(req.body.patientQrCode,req.body.address).then((patient) => {
+        getPatientForAdmin(req.body.patientQrCode).then((patient) => {
         console.log("PAT : ",patient);
         res.status(200).json({patient:patient});
     });
