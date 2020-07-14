@@ -150,6 +150,37 @@ const getPrescription = async (prescriptionId, patientQrCode, doctorAddress) => 
     }
 }
 
+const giveDoctorAccessToPatientRecords = async (patientQrCode, doctorAddress) => {
+    try{
+        console.log("GIVE ACCESS TO PATIENT : ", patientQrCode);
+        const contractObject = getContractObject();
+        let hash = "";
+        await contractObject.methods.giveDoctorAccessToPatientRecords(patientQrCode).send({from:doctorAddress,gas:'1000000'},(err,thash) => {
+            console.log("ACCESS GRANTED",thash);
+            hash = thash;
+            });
+        return {hash:hash,access:"GRANTED"};
+    }
+    catch(e){
+        return { error:e, access:"DENIED" } ;
+    }
+}
+
+const checkPermission = async(patientQrCode, doctorAddress) => {
+    try{
+        console.log("ACCESS CALL ");
+        const contractObject = getContractObject();
+        return await contractObject.methods.checkPermission(patientQrCode).call({from:doctorAddress}).then((access) => {
+            console.log("ACCESS : ",access);
+            return access;
+        });
+    }
+    catch(e){
+        console.log(e);
+        return false;
+    }
+}
+
 module.exports.getAccounts = getAccounts;
 module.exports.getMessage = getMessage;
 module.exports.getDocCount = getDocCount;
@@ -161,3 +192,5 @@ module.exports.patientCount = getPatCount;
 module.exports.getPatientForAdmin = getPatientForAdmin;
 module.exports.createPrescription = createPrescription;
 module.exports.getPrescription = getPrescription;
+module.exports.giveDoctorAccessToPatientRecords = giveDoctorAccessToPatientRecords;
+module.exports.checkPermission = checkPermission;

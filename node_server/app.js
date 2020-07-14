@@ -33,12 +33,18 @@ var cors = require('cors');
 //     useUnifiedTopology: true
 //   });
 // let gfs;
+mongoose.connect('mongodb://db:27017/scribeplus',
+{
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+});
+
 
 const app = express();
 const PORT = process.env.PORT ||3000 ;
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }));
-app.use(cors());
+app.use(cors({allowedHeaders: ['auth-token']}));
 
 const swaggerOptions = {
     swaggerDefinition : {

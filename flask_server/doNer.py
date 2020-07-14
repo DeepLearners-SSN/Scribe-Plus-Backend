@@ -5,7 +5,7 @@ def doNer(text, url='https://bern.korea.ac.kr/plain'):
 
     ner = requests.post(url, data={'sample_text': text}).json()
 
-    outputJSON = {'disease': [], 'drug': []}
+    outputJSON = {'disease': [], 'drug': [], 'symptoms': []}
 
     for i in ner['denotations']:
         if i['obj'] == 'disease':

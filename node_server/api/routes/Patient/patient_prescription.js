@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express();
-const { createPrescription,getPrescription,getPatientForAdmin, getDoctor } = require("../Blockchain/connection/handlers.js");
-const { prescriptionSchema,getPrescrtiptionSchema } = require('./patient_schema');
+const { createPrescription,getPrescription,getPatientForAdmin, getDoctor,giveDoctorAccessToPatientRecords,checkPermission } = require("../Blockchain/connection/handlers.js");
+const { prescriptionSchema,getPrescrtiptionSchema,patientDetailSchema } = require('./patient_schema');
 const { auth } = require('../../middleware/auth.js');
 const { sendPrescription } = require('../../middleware/sendPrescription.js');
 
@@ -65,28 +65,100 @@ router.post('/create',auth,async (req,res,next) => {
             return res.status(400).json({ error:error.details[0].message });
         }
         console.log("PRESCEIPTOIN API");
-        return await createPrescription(req.body.medicines, req.body.symptoms, req.body.diagnosis, req.body.advice, req.body.patientQrCode, req.body.doctorAddress).then((result) => {
-            console.log("RESULT : ",result);
-            getPatientForAdmin(req.body.patientQrCode).then((patient) => {
-                getDoctor(req.body.doctorAddress).then((doctor) => {
-                    sendPrescription(patient.email,patient.name,req.body.medicines, req.body.symptoms, req.body.diagnosis, req.body.advice, doctor["1"], doctor["2"], doctor["3"]).then((info,err) => {
-                        if(err){
-                            console.log("err",err);
-                            return res.status(400).json({message:"Presceiption Created! Not Mailed",result:result});
-                        }
-                        else{
-                            console.log("err",err,"info ",info);
-                            return res.status(200).json({message:"Presceiption Created!",result:result});
-                        }
-                    })
+        return await checkPermission(req.body.patientQrCode,req.body.doctorAddress).then(async(flag) => {
+            console.log("FLAG : ",flag);
+            if(flag === "granted" ){
+                return await createPrescription(req.body.medicines, req.body.symptoms, req.body.diagnosis, req.body.advice, req.body.patientQrCode, req.body.doctorAddress).then((result) => {
+                    console.log("RESULT : ",result);
+                    getPatientForAdmin(req.body.patientQrCode).then((patient) => {
+                        getDoctor(req.body.doctorAddress).then((doctor) => {
+                            sendPrescription(patient.email,patient.name,req.body.medicines, req.body.symptoms, req.body.diagnosis, req.body.advice, doctor["1"], doctor["2"], doctor["3"]).then((info,err) => {
+                                if(err){
+                                    console.log("err",err);
+                                    return res.status(400).json({message:"Presceiption Created! Not Mailed",result:result});
+                                }
+                                else{
+                                    console.log("err",err,"info ",info);
+                                    return res.status(200).json({message:"Presceiption Created!",result:result});
+                                }
+                            })
+                        });
+                    });
                 });
-            });
+            }
+            else{
+                res.status(401).json({message:"PLEASE VERIFY OTP"});
+            }
         });
     }
     catch(e){
         res.status(400).json({error:e});
     }
 });
+
+
+
+
+
+
+
+/**
+ * @swagger
+ * /api/patient/prescription/access:
+ *   post:
+ *      tags:
+ *          - patient
+ *      description: to get access for the prescription of the patient
+ *      consumes:
+ *       - application/json
+ *      parameters:
+ *       - name: auth-token
+ *         description: auth token got from  login.
+ *         in: header
+ *         type: string
+ *       - in: body
+ *         name: doctor
+ *         schema :
+ *             type: object
+ *             required:
+ *                  - patientQrCode
+ *                  - address
+ *             properties:
+ *                  patientQrCode:
+ *                      type: string
+ *                  address:
+ *                      type: string
+ *      responses:
+ *          200:
+ *             description: The doctor is given the access for the patient's records
+ *             schema:
+ *                  type: object
+ *                  properties:
+ *                          hash:
+ *                              type: string
+ *                          access:
+ *                              type: string                     
+ * 
+ * 
+ * 
+ *           
+ */
+router.post('/access',auth,async (req,res,next) => {
+    try{
+        const { error } = patientDetailSchema.validate(req.body);
+        if(error) { 
+            return res.status(400).json({ error:error.details[0].message });
+        }
+        console.log("PRESCEIPTOIN REQUEST API");
+        return await giveDoctorAccessToPatientRecords(req.body.patientQrCode, req.body.address).then((result) => {
+            res.status(200).json(result);
+        })
+    }
+    catch(e){
+        res.status(400).json({error:e});
+    }
+});
+
 
 
 
