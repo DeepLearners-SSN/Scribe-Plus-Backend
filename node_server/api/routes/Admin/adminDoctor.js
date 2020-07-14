@@ -50,7 +50,7 @@ router.get('/list', auth ,async (req,res,next)=> {
             for(let i=1;i<=count;i++){
                 console.log(accounts[i]);
                 await getDoctor(accounts[i]).then((doctor) => {
-                    const docJson = {name:doctor["1"], id:doctor["0"], phone:doctor["2"], email:doctor["3"]};
+                    const docJson = {name:doctor["1"], id:doctor["0"], phone:doctor["2"], email:doctor["3"], docAddress:accounts[i]};
                     doctorList.push(docJson);
                 });
             }
