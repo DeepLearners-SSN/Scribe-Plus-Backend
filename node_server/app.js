@@ -44,7 +44,18 @@ const app = express();
 const PORT = process.env.PORT ||3000 ;
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }));
-app.use(cors({allowedHeaders: ['auth-token']}));
+// app.use(cors({allowedHeaders: ['auth-token']}));
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+
+    if (req.method == 'OPTIONS') {
+        res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
+        return res.status(200).json({});
+    }
+    next();
+});
 
 const swaggerOptions = {
     swaggerDefinition : {
