@@ -2,7 +2,7 @@ const express = require('express');
 const router = express();
 const mongoose = require('mongoose');
 const { appointmentSchema,appointmentSchemaCheck }  = require('./doctor_schema');
-
+const { auth } = require('../../middleware/auth');
 
 
 /**
@@ -47,7 +47,7 @@ const { appointmentSchema,appointmentSchemaCheck }  = require('./doctor_schema')
  * 
  *           
  */
-router.post('/create',(req,res,next) => {
+router.post('/create', auth ,(req,res,next) => {
     try {
         const { error } = appointmentSchemaCheck.validate(req.body);
         if(error) { 
@@ -138,7 +138,7 @@ router.post('/create',(req,res,next) => {
  * 
  *           
  */
-router.post('/get',(req,res,next) => {
+router.post('/get', auth, (req,res,next) => {
     try {
         if(req.body.doctorAddress) { 
             appointmentSchema.find({ doctorAddress: req.body.doctorAddress },(err,appointment) => {
