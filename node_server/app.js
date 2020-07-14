@@ -33,6 +33,12 @@ var cors = require('cors');
 //     useUnifiedTopology: true
 //   });
 // let gfs;
+mongoose.connect('mongodb://db:27017/scribeplus',
+{
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+});
+
 
 const app = express();
 const PORT = process.env.PORT ||3000 ;
