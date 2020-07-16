@@ -32,8 +32,9 @@ services:
             - ganache
             - db
             - flask
-        # volumes: 
-        #     - /c/Users/jayvi/SIH/node_server/:/usr/src/app/
+        volumes: 
+            - logStore:/usr/src/app/
 
 volumes: 
     mongo_store:
+    logStore:
