@@ -2,7 +2,7 @@ const express = require('express');
 const router = express();
 const { adminLoginSchema } = require('./schema');
 const jwt = require('jsonwebtoken');
-
+const logger = require('../../../config/logger');
 
 /**
  * @swagger
@@ -51,14 +51,17 @@ router.post('/login',(req,res,next) => {
         }
         if(req.body.name === "admin" && req.body.password === "password"){
             const token = jwt.sign({ _name: req.body.name, _user: "admin" }, "jayvishaalj");
+            logger.log('info',`Admin Logged In ${token}`);
             return res.header('auth-token', token).status(200).json({ message: "Logged In!" });
         }
         else{
+            logger.log('error',`Admin Login API error ${JSON.stringify(req.body)} , error : Wrong Creds `);
             return res.status(400).json({message:"Wrong Creds"});
         }
         
     }
     catch(e){
+        logger.log('error',`Admin Login API error ${JSON.stringify(req.body)} , error : ${e} `);
         return res.status(400).json({message:"Wrong Creds"});
     }
 });

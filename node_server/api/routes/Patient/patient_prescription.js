@@ -4,6 +4,7 @@ const { createPrescription,getPrescription,getPatientForAdmin, getDoctor,giveDoc
 const { prescriptionSchema,getPrescrtiptionSchema,patientDetailSchema } = require('./patient_schema');
 const { auth } = require('../../middleware/auth.js');
 const { sendPrescription } = require('../../middleware/sendPrescription.js');
+const logger = require('../../../config/logger.js');
 
 
 
@@ -62,11 +63,13 @@ router.post('/create',auth,async (req,res,next) => {
     try{
         const { error } = prescriptionSchema.validate(req.body);
         if(error) { 
+            logger.log('error',`Patient Create Prescription API error ${JSON.stringify(req.body)}, error: ${error.details[0].message}`);
             return res.status(400).json({ error:error.details[0].message });
         }
         console.log("PRESCEIPTOIN API");
         return await checkPermission(req.body.patientQrCode,req.body.doctorAddress).then(async(flag) => {
             console.log("FLAG : ",flag);
+            logger.log('info',`Patient Create Prescription API  ${JSON.stringify(req.body)}, flag : ${flag.toString()}`);
             if(flag === "granted" ){
                 return await createPrescription(req.body.medicines, req.body.symptoms, req.body.diagnosis, req.body.advice, req.body.patientQrCode, req.body.doctorAddress).then((result) => {
                     console.log("RESULT : ",result);
@@ -74,11 +77,13 @@ router.post('/create',auth,async (req,res,next) => {
                         getDoctor(req.body.doctorAddress).then((doctor) => {
                             sendPrescription(patient.email,patient.name,req.body.medicines, req.body.symptoms, req.body.diagnosis, req.body.advice, doctor["1"], doctor["2"], doctor["3"]).then((info,err) => {
                                 if(err){
+                                    logger.log('err',`Patient Create Prescription API error  ${JSON.stringify(req.body)}, flag : ${flag.toString()}, error : ${err}`);
                                     console.log("err",err);
                                     return res.status(400).json({message:"Presceiption Created! Not Mailed",result:result});
                                 }
                                 else{
                                     console.log("err",err,"info ",info);
+                                    logger.log('info',`Patient Create Prescription API called and created  ${JSON.stringify(result)}`);
                                     return res.status(200).json({message:"Presceiption Created!",result:result});
                                 }
                             })
@@ -87,11 +92,13 @@ router.post('/create',auth,async (req,res,next) => {
                 });
             }
             else{
+                logger.log('info',`Patient Create Prescription API called VERIFY OTP  ${JSON.stringify(result)}`);
                 res.status(401).json({message:"PLEASE VERIFY OTP"});
             }
         });
     }
     catch(e){
+        logger.log('error',`Patient Create Prescription API error ${JSON.stringify(req.body)}, error: ${e}`);
         res.status(400).json({error:e});
     }
 });
@@ -147,14 +154,17 @@ router.post('/access',auth,async (req,res,next) => {
     try{
         const { error } = patientDetailSchema.validate(req.body);
         if(error) { 
+            logger.log('error',`Paitent allow access to Doctor Failed ${JSON.stringify(req.body)}, error: ${error.details[0].message}`);
             return res.status(400).json({ error:error.details[0].message });
         }
         console.log("PRESCEIPTOIN REQUEST API");
         return await giveDoctorAccessToPatientRecords(req.body.patientQrCode, req.body.address).then((result) => {
+            logger.log('info',` Doctor is given access to Patient ${JSON.stringify(req.body)}, hash : ${JSON.stringify(result)}`);
             res.status(200).json(result);
         })
     }
     catch(e){
+        logger.log('error',`Doctor Grant Access Failed ${JSON.stringify(req.body)} , error: ${e}`);
         res.status(400).json({error:e});
     }
 });
@@ -204,16 +214,19 @@ router.post('/get',auth,async(req,res,next) => {
     try{
         const { error } = getPrescrtiptionSchema.validate(req.body);
         if(error) { 
+            logger.log('error',`Get Prescription API  error  ${req.body} , error: ${error.details[0].message}`);
             return res.status(400).json({ error:error.details[0].message });
         }
         console.log("GET PRESCRIPTION !");
         return await getPrescription(req.body.prescriptionId, req.body.patientQrCode, req.body.doctorAddress).then((prescription) => {
             console.log("PRESCRIPTION : ",prescription);
+            logger.log('info',`Get Prescription API called ${req.body}, prescription: ${prescription}`);
             return res.status(200).json(prescription);
         });
         
     }
     catch(e){
+        logger.log('error',`Get Prescription API  error  ${req.body} , error: ${e}`);
         res.status(400).json({ error:e });
     }
 });

@@ -7,6 +7,7 @@ const { doctorSchema, doctorLoginSchema } = require('./doctor_schema');
 const { auth } = require('../../middleware/auth.js');
 const QRCode  = require('qrcode');
 const { sendMail } = require('../../middleware/sendmail.js');
+const logger = require('../../../config/logger.js');
 
 
 /**
@@ -63,10 +64,12 @@ router.post('/create',auth, async (req, res, next) => {
     try {
         const { error } = doctorSchema.validate(req.body);
         if (error) {
+            logger.log('error',`Doctor Create error ${JSON.stringify(req.body)} error : ${error}`);
             res.status(400).json({ error: error.details[0].message });
         }
         else {
             console.log("CREATE DOCTOR API CALLED", req.body);
+            logger.log('info',`Create Doctor API CALLED ${JSON.stringify(req.body)}`);
             const password = await bcrypt.hash(req.body.password, 10);
             console.log("PASSWORD ", password);
             createDoctor(req.body.name, req.body.phno, req.body.email, password).then(account => {
@@ -75,11 +78,13 @@ router.post('/create',auth, async (req, res, next) => {
                     console.log(url)
                     sendMail("DOCTOR ","This is the QR Code for the you to Login intot the app!",req.body.email,url).then((info,err) =>{
                         if(err){
+                            logger.log('error',`Create Doctor API Error ${err}`);
                             console.log("err",err," info ",info);
                             return res.status(400).json({ message: "Doctor added! But QrCode Not Mailed", result: account })
                            
                         }
                         else{
+                            logger.log('info',`Created new Doctor  ${JSON.stringify(account)}`);
                             return res.status(200).json({ message: "Doctor added!", result: account });
                         }
                     });
@@ -88,6 +93,7 @@ router.post('/create',auth, async (req, res, next) => {
         }
     }
     catch (e) {
+        logger.log('error',`Doctor create API error ${JSON.stringify(req.body)} , error: ${e}`);
         res.status(400).json({ message: "wrong details" });
     }
 
@@ -139,9 +145,11 @@ router.post('/details',auth, async (req, res, next) => {
     console.log("DOC DETAIL : ", req.body.address);
     try {
         const doctor = await getDoctor(req.body.address);
+        logger.log('info',`Doctor Details API Called ${JSON.stringify(req.body)} , doctor: ${JSON.stringify(doctor)}`);
         res.status(200).json({ doctor: { "name": doctor["1"], "phno": doctor["2"], "doctorId": doctor["0"], "email": doctor["3"] } });
     }
     catch (e) {
+        logger.log('error',`Doctor Details API error ${JSON.stringify(req.body)} , error: ${e}`);
         res.status(400).json({ message: "Wrong Address" });
     }
 
@@ -191,6 +199,7 @@ router.post('/login', async (req, res, next) => {
     try {
         const { error } = doctorLoginSchema.validate(req.body);
         if (error) {
+            logger.log('error',`Doctor Login API error ${JSON.stringify(req.body)} , error: ${error}`);
             res.status(400).json({ error: error.details[0].message });
         }
         else {
@@ -199,6 +208,7 @@ router.post('/login', async (req, res, next) => {
             const validPass = await bcrypt.compare(req.body.password, doctor["4"]);
             if (validPass) {
                 const token = jwt.sign({ _name: req.body.address, _user: "doctor" }, "jayvishaalj");
+                logger.log('info',`Doctor Login API  ${JSON.stringify(req.body)} , token: ${token}`);
                 return res.header('auth-token', token).status(200).json({ message: "Logged In!" });
             }
             else {
@@ -207,6 +217,7 @@ router.post('/login', async (req, res, next) => {
         }
     }
     catch (e) {
+        logger.log('error',`Doctor Login API error ${JSON.stringify(req.body)} , error: ${e}`);
         res.status(400).json({ message: "Wrong Creds" });
     }
 

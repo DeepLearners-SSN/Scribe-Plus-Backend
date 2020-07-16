@@ -6,6 +6,7 @@ const { patientSchema, patientDetailSchema } = require('./patient_schema');
 const { auth } = require('../../middleware/auth.js');
 const QRCode  = require('qrcode');
 const { sendMail } = require('../../middleware/sendmail.js');
+const logger = require('../../../config/logger.js');
 
 
 
@@ -103,6 +104,7 @@ router.post('/create',auth, (req, res, next) => {
     try {
         const { error } = patientSchema.validate(req.body);
         if (error) {
+            logger.log('error',`Create Patient API error ${JSON.stringify(req.body)} , error : ${error}`);
             return res.status(400).json({ error: error.details[0].message });
         }
         console.log("CREATE PATIENT API CALLED", req.body);
@@ -114,10 +116,12 @@ router.post('/create',auth, (req, res, next) => {
                 console.log(url);
                 sendMail("PATIENT ","This is the QR Code for the you to show to the doctor for accessing your Prescription history and also Booking appointments",req.body.email,url).then((info,err) =>{
                     if(err){
+                        logger.log('error',`Create Patient API MAIL error ${JSON.stringify(account)} , error : ${err}`);
                         console.log("err",err," info ",info);
                         return res.status(400).json({ message: "Patient added! But QrCode Not Mailed", result: account });
                     }
                     else{
+                        logger.log('info',`Created Patient ${JSON.stringify(req.body)} , patient : ${JSON.stringify(account)}`);
                         return res.status(200).json({ message: "patient added!", result: account });
                     }
                 });
@@ -126,6 +130,7 @@ router.post('/create',auth, (req, res, next) => {
         });
     }
     catch (e) {
+        logger.log('error',`Patient Details API error ${JSON.stringify(req.body)} , error: ${e}`);
         res.status(400).json({ message: "Wrong details!" });
     }
 
@@ -160,7 +165,7 @@ router.post('/create',auth, (req, res, next) => {
  *                      type: string
  *      responses:
  *          200:
- *             description: A doctor exist and the details of the doctor are returned 
+ *             description: A Patient exist and the details of the Patient are returned 
  *             schema:
  *                  type: object
  *                  properties:
@@ -173,16 +178,21 @@ router.post('/create',auth, (req, res, next) => {
  *                                      type: string
  *                                  email:
  *                                      type: string
- *                                  phno:
+ *                                  phone:
  *                                      type: string
  *                                  doctorsVisitedCount:
  *                                      type: string
  *                                  prescriptions:
  *                                      type: array
  *                                      items:
- *                                          $ref: "#/definitions/Prescription"                          
- * 
- * 
+ *                                          $ref: "#/definitions/Prescription"
+ *          401: 
+ *             description: A Patient exist but doctor doesnt have access to it
+ *             schema:
+ *                  type: object
+ *                  properties:
+ *                          OTP:
+ *                              type: string 
  * definitions:
  *          Prescription:
  *            type: object
@@ -201,25 +211,26 @@ router.post('/create',auth, (req, res, next) => {
  *                  type: string
  *              doctorName:
  *                  type: string
- * 
- *           
  */
 router.post('/details',auth,(req, res, next) => {
     try {
         const { error } = patientDetailSchema.validate(req.body);
         if (error) {
+            logger.log('error',`Patient Details API error ${JSON.stringify(req.body)} , error: ${error}`);
             return res.status(400).json({ error: error.details[0].message });
         }
         console.log("GET PAT : ", req.body);
         getPatient(req.body.patientQrCode, req.body.address).then(async(patient) => {
             console.log("PAT : ", patient);
             if (patient[1] === "null") {
+                logger.log('error',`Patient NOT FOUND ${JSON.stringify(req.body)}`);
                 res.status(404).json({ patient: "not found" });
             }
             else if (patient[1] === "newDoctor") {
                 const OTP = makeOTP(6);
                 console.log("OTP FOR PAT : ", req.body.patientQrCode, " is : ", OTP, "SEND TO : ", patient[3]);
                 sendOTP(patient[3], OTP).then(() => {
+                    logger.log('info',`Patient Details API OTP SENT ${JSON.stringify(req.body)} , OTP : ${OTP}`);
                     res.status(401).json({ OTP: OTP });
                 });
             }
@@ -230,10 +241,12 @@ router.post('/details',auth,(req, res, next) => {
                         responseJson.prescriptions.push(prescription);
                     });
                 }
+                logger.log('info',`Patient Details SENT ${JSON.stringify(responseJson)}`);
                 return res.status(200).json({ patient: responseJson });
             }
         })
     } catch (e) {
+        logger.log('error',`Patient Details API error ${JSON.stringify(req.body)} , error: ${e}`);
         res.status(400).json({ message: "ERROR", eror: e });
     }
 });

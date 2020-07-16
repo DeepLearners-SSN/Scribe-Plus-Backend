@@ -2,6 +2,7 @@ const compiler = require('solc');
 const fs = require('fs-extra');
 const Web3 = require('web3');
 const path = require('path');
+const logger = require('../../../../config/logger');
 
 const web3 = new Web3(new Web3.providers.HttpProvider("http://ganache:8545"));
 const eventProvider = new Web3.providers.WebsocketProvider(
@@ -41,6 +42,7 @@ const initialize = async() => {
     const receiptPath = path.resolve(buildPath, "eth-receipt"+".json");
     fs.writeJsonSync(receiptPath,myContract.options);
     const serialized = myContract.options.address;
+    logger.log('info',`Admin Account ${accounts[0]}`);
     return serialized;  
     }catch(e){
         console.log("Error Occured : ",e);
