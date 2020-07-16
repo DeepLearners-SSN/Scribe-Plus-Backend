@@ -1,6 +1,6 @@
 const Joi = require('@hapi/joi');
 const mongoose = require('mongoose');
-const { date } = require('@hapi/joi');
+const { date, string } = require('@hapi/joi');
 
 module.exports.doctorSchema = Joi.object({
     name: Joi.string().required(),
@@ -20,13 +20,26 @@ module.exports.appointmentSchemaCheck = Joi.object({
     time : Joi.string().required()
 });
 
+module.exports.addQuestionSchema = Joi.object({
+    appointmentNumber: Joi.number().required(),
+    questions: Joi.array().required()
+});
+
+module.exports.getAnswerSchema = Joi.object({
+    doctorAddress: Joi.string().required(),
+    patientAddress: Joi.string().required()
+});
+
 const appointmentSchema = mongoose.Schema({
     _id : mongoose.Schema.Types.ObjectId,
     doctorAddress : String,
     patientQrCode : String,
     appointmentNumber : Number,
     time : Date,
-    visited : Boolean
+    visited : Boolean,
+    questions : [String],
+    answers :[String],
+    answered: Boolean
 });
 
 module.exports.appointmentSchema = mongoose.model('Appointment', appointmentSchema);

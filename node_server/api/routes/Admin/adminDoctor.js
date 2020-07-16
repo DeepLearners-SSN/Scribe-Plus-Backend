@@ -2,7 +2,7 @@ const express = require('express');
 const router = express();
 const { getDocCount,getDoctor,getAccounts } = require("../Blockchain/connection/handlers.js");
 const { auth } = require('../../middleware/auth.js');
-
+const logger = require('../../../config/logger');
 
 /**
  * @swagger
@@ -43,18 +43,20 @@ router.get('/list', auth ,async (req,res,next)=> {
     getDocCount().then(async (count) => {
         console.log("DOC COUNT : ",count);
         if(count == 0){
+            logger.log('info',`List of Doctors API Called Count 0`);
            return res.status(200).json({});
         }
         else{
             const accounts = await getAccounts();
             for(let i=1;i<=count;i++){
-                console.log(accounts[i]);
+                // console.log(accounts[i]);
                 await getDoctor(accounts[i]).then((doctor) => {
                     const docJson = {name:doctor["1"], id:doctor["0"], phone:doctor["2"], email:doctor["3"], docAddress:accounts[i]};
                     doctorList.push(docJson);
                 });
             }
-            console.log("DOCTORS : ",doctorList);
+            logger.log('info',`List of Doctors API Called return json ${JSON.stringify(doctorList)}`);
+            // console.log("DOCTORS : ",doctorList);
             return res.status(200).send(doctorList);
         }
     });

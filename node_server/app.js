@@ -8,8 +8,7 @@ const router = require('./api/routes/router.js');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 var cors = require('cors');
-
-
+const logger = require('./config/logger');
 
 
 // const ioserver = require('http').createServer();
@@ -74,87 +73,6 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJSDoc(swaggerOptions);
 app.use('/api-doc',swaggerUi.serve,swaggerUi.setup(swaggerDocs,{explorer:false,customSiteTitle:"Scribe + Api",customCss:'.swagger-ui .topbar {display:none}'}));
 app.use(router);
-/**
- * @swagger
- *
- * /api/{username}:
- *   get:
- *     tags:
- *       - api
- *     description: user api to display the user in response
- *     produces:
- *       - application/json
- *     parameters:
- *       - name: username
- *         description: Username to use for login.
- *         in: path
- *         required: true
- *         type: string
- *     responses:
- *       200:
- *         description: login
- *         schema:
- *              type: object
- *              properties:
- *                  message:
- *                      type: string
- *                  user:
- *                      type: string
- *              
- */
-
-app.get('/api/:username',(req,res,next)=>{
-    const token = jwt.sign({_name : req.params.username},"jayvishaalj");
-    res.header('auth-token',token).status(200).json({message:"API BASE URL",user:req.params.username});
-});
-
-
-
-/**
- * @swagger
- * /api:
- *   get:
- *      tags:
- *          - api
- *      description: Returns the base api url
- *      parameters:
- *       - name: auth-token
- *         description: auth token got from  login.
- *         in: header
- *         type: string
- *      responses:
- *          200:
- *             description: A json containing a message
- *             schema:
- *                  type: object
- *                  properties:
- *                          message:
- *                              type: string
- *          401:
- *              description: Access Denied
- */
-app.get('/api',auth,(req,res,next)=>{
-    res.status(200).json({message:"Base URL"});
-});
-
-/**
- * @swagger
- * /auth:
- *   get:
- *      tags:
- *          - base
- *      description: Returns the base  url
- *      responses:
- *          200:
- *             description: A json containing a message
- *             schema:
- *                  type: object
- *                  properties:
- *                          message:
- *                              type: string
- */
-
-
 
 
 var server = app.listen(PORT,'0.0.0.0',async ()=> {
@@ -163,6 +81,8 @@ var server = app.listen(PORT,'0.0.0.0',async ()=> {
     console.log(`SERVER  ON ${PORT}`);
     var host = server.address().address;
     console.log('HOST : ',host);
+    logger.log('info',`server is up and running on port ${PORT}`);
+    logger.log('info',`contract is deployed to the Address ${address}`);
     // conn.once("open", () => {
     //     // init stream
     //     console.log("CONNECTION OPEN");

@@ -1,6 +1,6 @@
 var unirest = require("unirest");
 const req = unirest("POST", "https://www.fast2sms.com/dev/bulk");
-
+const logger = require('../../config/logger');
 
 module.exports.sendOTP = async(phno, otp) =>  {
     var messageString = "Please specify this OTP to the doctor : " + otp;
@@ -19,6 +19,7 @@ module.exports.sendOTP = async(phno, otp) =>  {
 
     req.end(async function (res) {
         if (res.error) {
+            logger.log('error',`An error occured at sending message ${res.error}`);
             throw new Error(res.error);
         }        
     });

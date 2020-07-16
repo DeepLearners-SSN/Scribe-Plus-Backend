@@ -4,6 +4,7 @@ const multer = require("multer");
 const AWS = require('aws-sdk');
 const multerS3 = require('multer-s3');
 const { auth } = require("../../middleware/auth");
+const logger = require('../../../config/logger');
 // const ID = 'AKIA4BGGYS5LC5IFN4PK';
 // const SECRET = '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';
 const ID = 'AKIA4BGGYS5LJXQVN53J';
@@ -57,7 +58,8 @@ var upload = multer({
  *          
  */
 router.post("/audio", auth ,upload.single("file"),async (req,res,next) => {
-  console.log("BODY",req.file);
+  // console.log("BODY",req.file);
+  logger.log('info',`upload Audio Api called ${JSON.stringify(req.file)}`);
   const transcriber = new AWS.TranscribeService({ region: "us-west-2" });
   const params = {
     LanguageCode: "en-IN",
@@ -73,7 +75,8 @@ router.post("/audio", auth ,upload.single("file"),async (req,res,next) => {
     OutputBucketName: "scribe-json1",
   };
   const data = await transcriber.startTranscriptionJob(params).promise();
-  console.log(data);
+  // console.log(data);
+  logger.log('info',`Uploaded Audio to S3 bucket, transcriber : ${JSON.stringify(data)} , socketId: ${req.file.key.slice(0,-4)}`);
   res.status(200).json({message:"success",socketId:req.file.key.slice(0,-4),transcriber:data});
 });
 
