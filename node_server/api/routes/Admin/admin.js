@@ -2,7 +2,7 @@ const express = require('express');
 const router = express();
 const { adminLoginSchema } = require('./schema');
 const jwt = require('jsonwebtoken');
-const logger = require('../../../config/logger');
+const logger = require('../../../config/logger')(module);
 
 /**
  * @swagger

@@ -10,10 +10,18 @@ const timezoned = () => {
   });
 };
 
-const logger = winston.createLogger({
+const getLabel = function(callingModule) {
+  const parts = callingModule.filename.split(path.sep);
+  return path.join(parts[parts.length - 2], parts.pop());
+};
+
+
+module.exports = (callingModule) => {
+  const logger = winston.createLogger({
     level: 'info',
     format: winston.format.combine(
-      format.label({ label: path.basename(process.mainModule.filename) }),
+      // format.label({ label: path.basename(process.mainModule.filename) }),
+      format.label({ label : getLabel(callingModule)}),
       format.timestamp({
         format: timezoned
       }),
@@ -28,5 +36,5 @@ const logger = winston.createLogger({
     })
     ],
   });
-
-module.exports = logger;
+  return logger;
+}

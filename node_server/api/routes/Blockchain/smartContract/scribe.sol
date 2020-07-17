@@ -152,16 +152,16 @@ contract Scribe {
                     _access = "granted";
                 }
                 else{
-                    _access = "nill";
+                    _access = "newDoc";
                 }
             }
             else{
-                    _access = "nill";
+                    _access = "noDoc";
                 }
         }
         else
         {
-            _access = "nill";
+            _access = "noPat";
         }
     }
 

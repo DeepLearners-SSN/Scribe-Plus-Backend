@@ -2,7 +2,7 @@ const compiler = require('solc');
 const fs = require('fs-extra');
 const Web3 = require('web3');
 const path = require('path');
-const logger = require('../../../../config/logger');
+const logger = require('../../../../config/logger')(module);
 
 const web3 = new Web3(new Web3.providers.HttpProvider("http://ganache:8545"));
 const eventProvider = new Web3.providers.WebsocketProvider(

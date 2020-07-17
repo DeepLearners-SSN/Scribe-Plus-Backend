@@ -6,7 +6,7 @@ const { patientSchema, patientDetailSchema } = require('./patient_schema');
 const { auth } = require('../../middleware/auth.js');
 const QRCode  = require('qrcode');
 const { sendMail } = require('../../middleware/sendmail.js');
-const logger = require('../../../config/logger.js');
+const logger = require('../../../config/logger.js')(module);
 
 
 

@@ -17,12 +17,14 @@ module.exports.doctorLoginSchema = Joi.object({
 module.exports.appointmentSchemaCheck = Joi.object({
     doctorAddress : Joi.string().required(),
     patientQrCode : Joi.string().required(),
-    time : Joi.string().required()
+    time : Joi.string().required(),
+    date: Joi.string().required()
 });
 
 module.exports.addQuestionSchema = Joi.object({
     appointmentNumber: Joi.number().required(),
-    questions: Joi.array().required()
+    questions: Joi.array().required(),
+    dateToAsk : Joi.string().required() 
 });
 
 module.exports.getAnswerSchema = Joi.object({
@@ -35,11 +37,13 @@ const appointmentSchema = mongoose.Schema({
     doctorAddress : String,
     patientQrCode : String,
     appointmentNumber : Number,
-    time : Date,
+    time : String,
+    date : Date,
     visited : Boolean,
     questions : [String],
     answers :[String],
-    answered: Boolean
+    answered: Boolean,
+    dateToAsk : Date
 });
 
 module.exports.appointmentSchema = mongoose.model('Appointment', appointmentSchema);
