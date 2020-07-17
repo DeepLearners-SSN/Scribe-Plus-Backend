@@ -181,6 +181,27 @@ const checkPermission = async(patientQrCode, doctorAddress) => {
     }
 }
 
+const getBalance = async(doctorAddress) => {
+    try {
+        let bal = "";
+        await web3.eth.getBalance(doctorAddress, async (err, balance) => {
+            if(err){
+                return err;
+            }
+            console.log("BALANCE :  ",balance);
+            bal = web3.utils.fromWei(balance, "ether") + " ETH";
+            // web3.eth.getPastLogs({
+            //     address: doctorAddress
+            // })
+            // .then("PAST LOGS : ",console.log);
+          });
+          return bal;
+    } catch (e) {
+        return e;
+    }
+}
+
+
 module.exports.getAccounts = getAccounts;
 module.exports.getMessage = getMessage;
 module.exports.getDocCount = getDocCount;
@@ -194,3 +215,4 @@ module.exports.createPrescription = createPrescription;
 module.exports.getPrescription = getPrescription;
 module.exports.giveDoctorAccessToPatientRecords = giveDoctorAccessToPatientRecords;
 module.exports.checkPermission = checkPermission;
+module.exports.getBalance = getBalance;

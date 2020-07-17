@@ -8,7 +8,7 @@ const router = require('./api/routes/router.js');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 var cors = require('cors');
-const logger = require('./config/logger');
+const logger = require('./config/logger')(module);
 
 
 // const ioserver = require('http').createServer();

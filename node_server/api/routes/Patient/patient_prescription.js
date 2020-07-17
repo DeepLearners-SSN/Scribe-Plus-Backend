@@ -4,7 +4,7 @@ const { createPrescription,getPrescription,getPatientForAdmin, getDoctor,giveDoc
 const { prescriptionSchema,getPrescrtiptionSchema,patientDetailSchema } = require('./patient_schema');
 const { auth } = require('../../middleware/auth.js');
 const { sendPrescription } = require('../../middleware/sendPrescription.js');
-const logger = require('../../../config/logger.js');
+const logger = require('../../../config/logger.js')(module);
 
 
 

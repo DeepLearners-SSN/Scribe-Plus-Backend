@@ -2,7 +2,7 @@ const express = require('express');
 const router = express();
 const { getDocCount,getDoctor,getAccounts } = require("../Blockchain/connection/handlers.js");
 const { auth } = require('../../middleware/auth.js');
-const logger = require('../../../config/logger');
+const logger = require('../../../config/logger')(module);
 
 /**
  * @swagger

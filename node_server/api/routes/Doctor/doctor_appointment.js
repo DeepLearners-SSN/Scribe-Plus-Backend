@@ -3,7 +3,8 @@ const router = express();
 const mongoose = require('mongoose');
 const { appointmentSchema,appointmentSchemaCheck }  = require('./doctor_schema');
 const { auth } = require('../../middleware/auth');
-const logger = require('../../../config/logger');
+const { checkPermission,getPatientForAdmin, getDoctor } = require('../Blockchain/connection/handlers');
+const logger = require('../../../config/logger')(module);
 
 
 /**
@@ -26,12 +27,16 @@ const logger = require('../../../config/logger');
  *             type: object
  *             required: 
  *                  - time
+ *                  - date
  *                  - patientQrCode
  *                  - doctorAddress
  *             properties:
  *                  time:
  *                      type: string
- *                      format: YYYY-MM-DDTHH:MM:SSZ
+ *                      format: HH:MM:SS
+ *                  date:
+ *                      type: string
+ *                      format: YYYY-MM-DD
  *                  patientQrCode:
  *                      type: string
  *                  doctorAddress:
@@ -64,10 +69,12 @@ router.post('/create', auth ,(req,res,next) => {
                 patientQrCode : req.body.patientQrCode,
                 appointmentNumber : count+1,
                 time : req.body.time,
+                date:  req.body.date,
                 questions: [],
                 answers: [],
                 visited : false,
-                answered : false
+                answered : false,
+                dateToAsk : undefined
             });
             appointment.save().then((result)=>{
                 console.log("RESULT "+result);
@@ -123,8 +130,32 @@ router.post('/create', auth ,(req,res,next) => {
  *             schema:
  *                  type: array
  *                  items:
- *                      $ref: "#/definitions/appointment"
- *                                                      
+ *                      type: object
+ *                      properties:
+ *                          appointment:
+ *                              $ref: "#/definitions/appointment"
+ *                          patientDetails:
+ *                              type: object
+ *                              properties:
+ *                                  name:
+ *                                      type: string
+ *                                  phno:
+ *                                      type: string
+ *                                  patientId:
+ *                                      type: string
+ *                                  email:
+ *                                      type: string
+ *                          doctorDetials:
+ *                              type: object
+ *                              properties:
+ *                                  name:
+ *                                      type: string
+ *                                  phno:
+ *                                      type: string
+ *                                  doctorId:
+ *                                      type: string
+ *                                  email:
+ *                                      type: string    
  *
  * definitions:
  *          appointment:
@@ -140,8 +171,10 @@ router.post('/create', auth ,(req,res,next) => {
  *                  type: number   
  *              time:
  *                  type: string
+ *                  format: HH:MM:SS
  *              date:
- *                  type: date
+ *                  type: string
+ *                  pattern: YYYY-MM-DD
  *              visited:
  *                  type: boolean
  *              questions:
@@ -154,21 +187,127 @@ router.post('/create', auth ,(req,res,next) => {
  *                      type: string
  *              answered:
  *                  type: boolean
+ *              dateToAsk:
+ *                  type: string
+ *                  pattern: YYYY-MM-DD
  * 
  *           
  */
 router.post('/get', auth, (req,res,next) => {
     try {
         if(req.body.doctorAddress) { 
-            appointmentSchema.find({ doctorAddress: req.body.doctorAddress },(err,appointment) => {
+            appointmentSchema.find({ "doctorAddress": req.body.doctorAddress }, async (err,appointments) => {
                 if(err){
                     logger.log('error',`Doctor Appointment  Details API error ${JSON.stringify(req.body)} , error: ${err}`);
                     res.status(400).json({ error:err });
                 }
                 else
                 {
-                    logger.log('info',`Doctor Appointment Details API called ${JSON.stringify(req.body)} , appointment: ${JSON.stringify(appointment)}`);
-                    res.status(200).json(appointment);
+                    let jsonRes = [];
+                    for(var i=0;i<appointments.length;i++){
+                        await getPatientForAdmin(appointments[i].patientQrCode).then(async (patientDetails) => {
+                            await getDoctor(appointments[i].doctorAddress).then((doctor) => {
+                                jsonRes.push({appointment:appointments[i], patientDetails:patientDetails, doctorDetials:{ "name": doctor["1"], "phno": doctor["2"], "doctorId": doctor["0"], "email": doctor["3"] }});
+                            });
+                        });
+                    }
+                    logger.log('info',`Doctor Appointment Details ALL API called ${JSON.stringify(req.body)} , appointment: ${JSON.stringify(jsonRes)}`);
+                    res.status(200).json(jsonRes);
+                }
+            });
+        }
+        else{
+            logger.log('error',`Doctor Appointment Details ALL API error ${JSON.stringify(req.body)} , error :  Doctor address not specified `);
+            return res.status(400).json({ error:"specify the doctor address" });
+        }
+    } catch (error) {
+        logger.log('error',`Doctor Appointment Details ALL API error ${JSON.stringify(req.body)} , error :  ${error}`);
+        res.status(500).json({
+            message : error
+        });
+    }
+});
+
+
+/**
+ * @swagger
+ * /api/doctor/appointment/date:
+ *   post:
+ *      tags:
+ *          - doctor
+ *      description: to get all appointments of a doctor on a given date
+ *      consumes:
+ *       - application/json
+ *      parameters:
+ *       - name: auth-token
+ *         description: auth token got from  login.
+ *         in: header
+ *         type: string
+ *       - in: body
+ *         name: doctor
+ *         schema :
+ *             type: object
+ *             required: 
+ *                  - doctorAddress
+ *                  - date
+ *             properties:
+ *                  doctorAddress:
+ *                      type: string
+ *                  date:
+ *                      type: string
+ *                      pattern: YYYY-MM-DD
+ *      responses:
+ *          200:
+ *             description: all the appointments of a doctor is displayed 
+ *             schema:
+ *                  type: array
+ *                  items:
+ *                      type: object
+ *                      properties:
+ *                          appointment:
+ *                              $ref: "#/definitions/appointment"
+ *                          patientDetails:
+ *                              type: object
+ *                              properties:
+ *                                  name:
+ *                                      type: string
+ *                                  phno:
+ *                                      type: string
+ *                                  patientId:
+ *                                      type: string
+ *                                  email:
+ *                                      type: string
+ *                          isNewPatient:
+ *                              type: boolean       
+ *
+ * 
+ *           
+ */
+router.post('/date', auth, (req,res,next) => {
+    try {
+        if(req.body.doctorAddress) { 
+            appointmentSchema.find({ "doctorAddress": req.body.doctorAddress, "date": req.body.date },async(err,appointments) => {
+                if(err){
+                    logger.log('error',`Doctor Appointment  Details API error ${JSON.stringify(req.body)} , error: ${err}`);
+                    res.status(400).json({ error:err });
+                }
+                else
+                {
+                    let jsonRes = [];
+                    for(var i=0;i<appointments.length;i++){
+                        await getPatientForAdmin(appointments[i].patientQrCode).then(async (patientDetails) => {
+                            await checkPermission(appointments[i].patientQrCode, appointments[i].doctorAddress).then((access) => {
+                                if(access === "granted"){
+                                    jsonRes.push({appointment:appointments[i], patientDetails:patientDetails, isNewPatient: false });
+                                }
+                                else if(access === "newDoc"){
+                                    jsonRes.push({appointment:appointments[i], patientDetails:patientDetails, isNewPatient: true });
+                                }
+                            })
+                        });
+                    }
+                    logger.log('info',`Doctor Appointment Details API called ${JSON.stringify(req.body)} , appointment: ${JSON.stringify(jsonRes)}`);
+                    res.status(200).json(jsonRes);
                 }
             });
         }

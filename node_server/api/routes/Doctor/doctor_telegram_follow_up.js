@@ -3,7 +3,7 @@ const router = express();
 const mongoose = require('mongoose');
 const { appointmentSchema, addQuestionSchema, getAnswerSchema }  = require('./doctor_schema');
 const { auth } = require('../../middleware/auth');
-const logger = require('../../../config/logger');
+const logger = require('../../../config/logger')(module);
 const { getPatientForAdmin } = require('../Blockchain/connection/handlers');
 
 
@@ -28,6 +28,7 @@ const { getPatientForAdmin } = require('../Blockchain/connection/handlers');
  *             required: 
  *                  - appointmentNumber
  *                  - questions
+ *                  - date
  *             properties:
  *                  appointmentNumber:
  *                      type: number
@@ -35,6 +36,9 @@ const { getPatientForAdmin } = require('../Blockchain/connection/handlers');
  *                      type: array
  *                      items:
  *                          type: string
+ *                  dateToAsk:
+ *                      type: string
+ *                      pattern: YYYY-MM-DD
  *      responses:
  *          200:
  *             description: The Follow up is successfully added 
@@ -57,7 +61,7 @@ router.post('/add', auth ,async (req,res,next) => {
         }
         appointmentSchema.updateOne(
             {'appointmentNumber' : req.body.appointmentNumber},
-            {"questions" : req.body.questions},
+            {"questions" : req.body.questions, "dateToAsk" : req.body.dateToAsk},
             (err,raw) => {
                 if(err){
                     logger.log('error',`Doctor Appointment Question Add API error ${JSON.stringify(req.body)}, error: ${err} `);
@@ -80,7 +84,7 @@ router.post('/add', auth ,async (req,res,next) => {
  *   post:
  *      tags:
  *          - doctor
- *      description: to add follow up questions to be asked by the telegram bot to the patients
+ *      description: to get follow up questions that are answered by the patients for the respective doctor's follow up question
  *      consumes:
  *       - application/json
  *      parameters:
@@ -121,13 +125,16 @@ router.post('/add', auth ,async (req,res,next) => {
  *                                  type: string
  *                          appointmentNumber:
  *                              type: string
+ *                          dateToAsk:
+ *                              type: string
+ *                              pattern: YYYY-MM-DD
  * 
  *           
  */
 router.post('/all', auth, async(req,res,next) => {
     try {
         if(req.body.doctorAddress){
-            appointmentSchema.find({"doctorAddress":req.body.doctorAddress, "answered": true},async(err,appointments) => {
+            appointmentSchema.find({"doctorAddress":req.body.doctorAddress, "answered": true, "visited": true},async(err,appointments) => {
                 console.log("appointments :",appointments);
                 let jsonRes = [];
                 for(var i=0;i<appointments.length;i++){
@@ -149,6 +156,73 @@ router.post('/all', auth, async(req,res,next) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/doctor/followup/get:
+ *   post:
+ *      tags:
+ *          - doctor
+ *      description: to get follow up questions and Answers related to the respective doctor and patient this gives the result even if the patient didn't answer the questions
+ *      consumes:
+ *       - application/json
+ *      parameters:
+ *       - name: auth-token
+ *         description: auth token got from  login.
+ *         in: header
+ *         type: string
+ *       - in: body
+ *         name: doctor
+ *         schema :
+ *             type: object
+ *             required: 
+ *                  - doctorAddress
+ *                  - patientQrCode
+ *             properties:
+ *                  doctorAddress:
+ *                      type: string
+ *                  patientQrCode:
+ *                      type: string
+ *      responses:
+ *          200:
+ *             description: All the Follow up realted to this doctor and patient are displayed
+ *             schema:
+ *                  type: array
+ *                  items:
+ *                      type: object
+ *                      properties:
+ *                          time:
+ *                              type: string
+ *                          questions:
+ *                              type: array
+ *                              items:
+ *                                  type: string
+ *                          answers:
+ *                              type: array
+ *                              items:
+ *                                  type: string
+ *                          appointmentNumber:
+ *                              type: string
+ * 
+ *           
+ */
+router.post('/get', auth, async(req,res,next) => {
+    try {
+        if(req.body.doctorAddress){
+            appointmentSchema.find({"doctorAddress":req.body.doctorAddress, "patientQrCode": req.body.patientQrCode, "visited": true},' appointmentNumber time questions answers',async(err,appointments) => {
+                console.log("appointments :",appointments);
+                logger.log('info',`Doctor Appointments GET ONE PATIENT for ${JSON.stringify(req.body)} got ${JSON.stringify(appointments)}`);
+                return res.status(200).json(appointments);
+            })
+        }
+        else{
+            logger.log('error',`Doctor Appointment GET ONE PATIENT API error ${JSON.stringify(req.body)} error : Doctor Address is not present`);
+            return res.status(400).json({ error:"Doctor Address is not present" });
+        }
+    } catch (e) {
+        logger.log('error',`Doctor Appointment GET ONE PATIENT API error ${JSON.stringify(req.body)} error : ${e}`);
+            return res.status(500).json({ error: e });
+    }
+});
 
 
 module.exports = router;
