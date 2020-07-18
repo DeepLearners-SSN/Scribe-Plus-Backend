@@ -279,7 +279,8 @@ router.post('/get', auth, (req,res,next) => {
  *                                      type: string
  *                          isNewPatient:
  *                              type: boolean       
- *
+ *                          appointmentTime:
+ *                              type: string
  * 
  *           
  */
@@ -298,10 +299,10 @@ router.post('/date', auth, (req,res,next) => {
                         await getPatientForAdmin(appointments[i].patientQrCode).then(async (patientDetails) => {
                             await checkPermission(appointments[i].patientQrCode, appointments[i].doctorAddress).then((access) => {
                                 if(access === "granted"){
-                                    jsonRes.push({appointment:appointments[i], patientDetails:patientDetails, isNewPatient: false });
+                                    jsonRes.push({appointment:appointments[i], patientDetails:patientDetails, isNewPatient: false,appointmentTime: appointments[i]['date']+'T'+appointments[i]['time']+'Z' });
                                 }
                                 else if(access === "newDoc"){
-                                    jsonRes.push({appointment:appointments[i], patientDetails:patientDetails, isNewPatient: true });
+                                    jsonRes.push({appointment:appointments[i], patientDetails:patientDetails, isNewPatient: true,appointmentTime: appointments[i]['date']+'T'+appointments[i]['time']+'Z' });
                                 }
                             })
                         });
