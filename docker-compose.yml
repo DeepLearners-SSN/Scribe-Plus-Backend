@@ -26,7 +26,7 @@ services:
             - db
             - flask
         volumes: 
-            - logStore:/usr/src/app/combined.log
+            - logStore:/usr/src/app/
 
 volumes: 
     mongo_store:
