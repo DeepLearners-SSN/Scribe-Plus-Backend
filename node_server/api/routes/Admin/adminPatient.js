@@ -48,11 +48,16 @@ const logger = require('../../../config/logger')(module);
 router.post('/details',auth,(req,res,next)=> {
     try{
         console.log("GET PAT : ",req.body);
-        getPatientForAdmin(req.body.patientQrCode).then((patient) => {
-        console.log("PAT : ",patient);
-        logger.log('info',`Admin Call Patient Details API  ${JSON.stringify(req.body)}, patient: ${JSON.stringify(patient)}`);
-        res.status(200).json({patient:patient});
-    });
+        if(req.body.patientQrCode === undefined){
+            res.status(400).json({message:"Bad Request"});
+        }
+        else{
+            getPatientForAdmin(req.body.patientQrCode).then((patient) => {
+                console.log("PAT : ",patient);
+                logger.log('info',`Admin Call Patient Details API  ${JSON.stringify(req.body)}, patient: ${JSON.stringify(patient)}`);
+                res.status(200).json({patient:patient});
+            });
+        }
     }
     catch(e){
         logger.log('error',`ADMIN Patient Details API error ${JSON.stringify(req.body)} , error: ${e}`);
