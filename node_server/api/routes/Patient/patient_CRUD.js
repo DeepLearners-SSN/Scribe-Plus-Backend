@@ -236,10 +236,12 @@ router.post('/details',auth,(req, res, next) => {
             }
             else {
                 let responseJson = {name:patient["1"], id:patient["0"], email:patient["2"], phone:patient["3"], doctorsVisitedCount:patient["4"], prescriptions:[]}
-                for(let i=0;i<parseInt(patient["7"]);i++){
-                    await getPrescription(patient["5"][i], req.body.patientQrCode, req.body.address).then((prescription) => {
-                        responseJson.prescriptions.push(prescription);
-                    });
+                if(patient["7"]){
+                    for(let i=0;i<parseInt(patient["7"]);i++){
+                        await getPrescription(patient["5"][i], req.body.patientQrCode, req.body.address).then((prescription) => {
+                            responseJson.prescriptions.push(prescription);
+                        });
+                    }
                 }
                 logger.log('info',`Patient Details SENT ${JSON.stringify(responseJson)}`);
                 return res.status(200).json({ patient: responseJson });

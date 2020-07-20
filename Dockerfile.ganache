@@ -7,3 +7,4 @@ RUN npm --global config set user root
 RUN npm install --global --unsafe-perm ganache-cli
 
 CMD ["ganache-cli","-h","0.0.0.0","-a","100"]
+EXPOSE 8545
