@@ -1,34 +1,61 @@
 version: "3"
 services: 
     ganache:
-        image: cloud.canister.io:5000/jayvishaallj/scribe-ganache
+        image: jayvishaalj/ganache
         ports: 
-            - "8545:8545"
+            - 8545:8545
+        networks:
+            - traefik
     
     db:
         image: mongo
-        ports: 
-            - "27017:27017"
         volumes:
             - mongo_store:/data/lib/
+        labels:
+            - traefik.enable=true
+            - traefik.backend=db
+            - traefik.backend.healthcheck.path=/health
+            - traefik.backend.healthcheck.interval=1s
+            - traefik.http.routers.db.rule=PathPrefix(`/db`)
+        networks:
+            - traefik
     
     flask:
         image: cloud.canister.io:5000/jayvishaallj/scribe-flask-server
-        ports: 
-            - "5000:5000"
-            - "5001:5001"
+        labels:
+            - traefik.enable=true
+            - traefik.backend=flask
+            - traefik.backend.healthcheck.path=/health
+            - traefik.backend.healthcheck.interval=1s
+            - traefik.http.routers.flask.rule=Host(`flask.192.168.99.100`)
+            - traefik.http.services.flask.loadbalancer.server.port=5000
+        networks:
+            - traefik
     
     nodeserver:
         image: cloud.canister.io:5000/jayvishaallj/scribe-node-server
-        ports: 
-            - "3000:3000"
         depends_on: 
             - ganache
             - db
             - flask
         volumes: 
             - logStore:/usr/src/app/
+        labels:
+            - traefik.enable=true
+            - traefik.backend=nodeserver
+            - traefik.backend.healthcheck.path=/health
+            - traefik.backend.healthcheck.interval=1s
+            - traefik.http.routers.nodeserver.entrypoints=web
+            - traefik.http.routers.nodeserver.rule=Host(`192.168.99.100`)
+            - traefik.http.services.nodeserver.loadbalancer.server.port=3000
+        networks:
+            - traefik
 
-volumes: 
+volumes:
     mongo_store:
     logStore:
+
+networks:
+    traefik:
+        external:
+            name: traefik_webgateway

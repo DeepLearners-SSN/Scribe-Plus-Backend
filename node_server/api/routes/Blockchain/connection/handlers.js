@@ -105,7 +105,11 @@ const getPatientForAdmin = async(patientQrCode) =>{
         return web3.eth.getAccounts().then(async (accounts) => {
             return await contractObject.methods.getPatient(patientQrCode).call({from:accounts[0]}).then((patient) => {
                 console.log("PAT : ",patient);
-                return {id:patient[0], name:patient[1], email:patient[2], phone:patient[3], doctorVisited:patient[4], doctorsVisited:patient[6]};
+                if(patient[0]&&patient[1])
+                {
+                    return {id:patient[0], name:patient[1], email:patient[2], phone:patient[3], doctorVisited:patient[4], doctorsVisited:patient[6]};
+                }
+                
             });     
         });
    }
