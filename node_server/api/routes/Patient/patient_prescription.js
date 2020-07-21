@@ -75,7 +75,7 @@ router.post('/create',auth,async (req,res,next) => {
                     console.log("RESULT : ",result);
                     getPatientForAdmin(req.body.patientQrCode).then((patient) => {
                         getDoctor(req.body.doctorAddress).then((doctor) => {
-                            sendPrescription(patient.email,patient.name,req.body.medicines, req.body.symptoms, req.body.diagnosis, req.body.advice, doctor["1"], doctor["2"], doctor["3"]).then((info,err) => {
+                            sendPrescription(patient.email,patient.name,req.body.medicines, req.body.symptoms, req.body.diagnosis, req.body.advice, doctor["1"], doctor["2"], doctor["3"], result.prescriptionName, req.body.patientQrCode, patient.phone).then((info,err) => {
                                 if(err){
                                     logger.log('err',`Patient Create Prescription API error  ${JSON.stringify(req.body)}, flag : ${flag.toString()}, error : ${err}`);
                                     console.log("err",err);
