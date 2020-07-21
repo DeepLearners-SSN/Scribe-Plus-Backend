@@ -1,7 +1,7 @@
 version: "3"
 services: 
     ganache:
-        image: jayvishaalj/ganache
+        image: repo.treescale.com/jayvishaalj/scribe-ganache
         ports: 
             - "8545:8545"
     
@@ -13,12 +13,12 @@ services:
             - mongo_store:/data/lib/
     
     flask:
-        image: cloud.canister.io:5000/jayvishaallj/scribe-flask-server
+        image: repo.treescale.com/jayvishaalj/scribe-flask-server
         ports: 
             - "5000:5000"
     
     nodeserver:
-        image: cloud.canister.io:5000/jayvishaallj/scribe-node-server
+        image: repo.treescale.com/jayvishaalj/scribe-node-server
         ports: 
             - "3000:3000"
         depends_on: 
