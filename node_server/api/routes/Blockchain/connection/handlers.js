@@ -127,13 +127,13 @@ const createPrescription = async(medicines, symptoms, diagnosis, advice, patient
         var today = new Date();
         var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
         var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-        var dateTime = date+' '+time;
+        var dateTime = date+'T'+time;
         let hash = "";
-        await contractObject.methods.createPrescription(medicines,symptoms,diagnosis,advice,dateTime,patientQrCode).send({from:doctorAddress,gas:'1000000'},(err,thash) => {
+        await contractObject.methods.createPrescription(medicines, symptoms, diagnosis, advice, dateTime, patientQrCode).send({from:doctorAddress,gas:'1000000'},(err,thash) => {
             console.log("PRESCRIPTION",thash);
             hash = thash;
             });
-        return {hash:hash};
+        return {hash:hash, prescriptionName: dateTime};
     }
     catch(e){
         return { error:e };
@@ -197,7 +197,9 @@ const getBalance = async(doctorAddress) => {
             // web3.eth.getPastLogs({
             //     address: doctorAddress
             // })
-            // .then("PAST LOGS : ",console.log);
+            // .then((logs) => {
+            //     console.log("PAST LOGS : ",logs);
+            // })
           });
           return bal;
     } catch (e) {

@@ -69,7 +69,7 @@ router.post("/audio", auth ,upload.single("file"),async (req,res,next) => {
     },
     TranscriptionJobName: req.file.key.slice(0,-4),
     Settings: {
-      MaxSpeakerLabels: "5",
+      MaxSpeakerLabels: "2",
       ShowSpeakerLabels: true,
     },
     OutputBucketName: "scribe-json1",
