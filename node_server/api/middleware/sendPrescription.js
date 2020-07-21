@@ -16,7 +16,8 @@ const s3 = new AWS.S3({
 });
 
 module.exports.sendPrescription = async(toEmail, name, medicines, symptoms, diagnosis, advice, doctorname, doctorEmail, phno, prescriptionName, patientQrCode, patPhone) => {
-    const pdf = new PDFDocument();
+    const password = patPhone.slice(0,-5);
+    const pdf = new PDFDocument({userPassword:password});
 
     var transporter = nodemailer.createTransport({
         service: 'gmail',
