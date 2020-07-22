@@ -30,7 +30,7 @@ services:
     reactserver:
         image: repo.treescale.com/jayvishaalj/scribe-react-server
         ports: 
-            - "4000:80"
+            - "80:80"
 
 volumes: 
     mongo_store:
