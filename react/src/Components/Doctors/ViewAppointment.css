@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;400;500&display=swap');
+
+.docHeaderContent {
+    height: 25vh;
+    display: grid;
+}
+
+
+.docHeaderText {
+    margin: auto;
+}
+
+.docHeaderName {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.docHeaderEmail, .docHeaderPhone {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.appList {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3);
+    text-align: center;
+    width: 250px;
+    height: 250px;
+    padding: 3%;
+    margin-left: 30%;
+    margin-top: 4%;
+
+}
+
+.appName {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    text-align: end;
+}
+
+.appEmail {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 200;
+    text-align: end;
+    padding-bottom: 10%;
+    border-bottom: 0.5px solid grey;
+}
+
+.appPhone {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 18px;
+    font-weight: 200;
+    text-align: end;
+}
+
+.appNumber {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 24px;
+    font-weight: 500px;
+    text-align: center;
+    border-bottom: 0.5px solid grey;
+    margin-top: 4%;
+    padding-bottom: 4%;
+    margin-bottom: 10%;
+}
+
+.appDate {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    float: left;
+}
+
+.appTime {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+
+    float: right;
+}

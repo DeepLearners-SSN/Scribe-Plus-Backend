@@ -76,12 +76,18 @@ router.get('/count', async (req, res, next) => {
  *                  - name
  *                  - phno
  *                  - email
+ *                  - dob
+ *                  - gender
  *              properties:
  *                  name:
  *                      type: string
  *                  phno:
  *                      type: string
  *                  email:
+ *                      type: string
+ *                  dob:
+ *                      type: string
+ *                  gender:
  *                      type: string
  *      responses:
  *          200:
@@ -110,7 +116,7 @@ router.post('/create',auth, (req, res, next) => {
         console.log("CREATE PATIENT API CALLED", req.body);
         const patientQrCode = makeQrCode(16);
         console.log(patientQrCode);
-        createPatient(req.body.name, req.body.phno, req.body.email, patientQrCode).then((account) => {
+        createPatient(req.body.name, req.body.phno, req.body.email, patientQrCode, req.body.dob, req.body.gender).then((account) => {
             console.log("ACCOUNT PAT : ", account);
             QRCode.toDataURL(account.account,{scale:10}, function (err, url) {
                 console.log(url);
@@ -182,6 +188,10 @@ router.post('/create',auth, (req, res, next) => {
  *                                      type: string
  *                                  doctorsVisitedCount:
  *                                      type: string
+ *                                  dob:
+ *                                      type: string
+ *                                  gender:
+ *                                      type: string
  *                                  prescriptions:
  *                                      type: array
  *                                      items:
@@ -235,9 +245,9 @@ router.post('/details',auth,(req, res, next) => {
                 });
             }
             else {
-                let responseJson = {name:patient["1"], id:patient["0"], email:patient["2"], phone:patient["3"], doctorsVisitedCount:patient["4"], prescriptions:[]}
-                if(patient["7"]){
-                    for(let i=0;i<parseInt(patient["7"]);i++){
+                let responseJson = {name:patient["1"], id:patient["0"], email:patient["2"], phone:patient["3"], doctorsVisitedCount:patient["4"], prescriptions:[], dob:patient["7"], gender:patient["8"]}
+                if(patient["6"]){
+                    for(let i=0;i<parseInt(patient["6"]);i++){
                         await getPrescription(patient["5"][i], req.body.patientQrCode, req.body.address).then((prescription) => {
                             responseJson.prescriptions.push(prescription);
                         });

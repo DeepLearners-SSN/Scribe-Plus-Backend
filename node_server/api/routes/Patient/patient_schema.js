@@ -4,6 +4,8 @@ module.exports.patientSchema = Joi.object({
     name: Joi.string().required(),
     phno: Joi.string().min(10).max(10).required(),
     email: Joi.string().min(6).required().email(),
+    dob: Joi.string().required(),
+    gender: Joi.string().required(),
 });
 
 module.exports.patientDetailSchema = Joi.object({

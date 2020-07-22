@@ -66,13 +66,13 @@ const getPatCount  = async() => {
     return await contractObject.methods.patientCount().call().then((c) => { return c });
 }
 
-const createPatient = async(name, phno, email, patientQrCode) =>{
+const createPatient = async(name, phno, email, patientQrCode, dob, gender) =>{
     console.log("CREATE PATIENT : ",name,phno,email);
     const contractObject = getContractObject();
     return web3.eth.getAccounts().then(async (accounts) => {
         let hash = {}
         console.log(accounts[0]);
-        await  contractObject.methods.addPatient(name, phno, email, patientQrCode).send({from:accounts[0],gas:'1000000'},(err,thash) => {
+        await  contractObject.methods.addPatient(name, phno, email, patientQrCode, dob, gender).send({from:accounts[0],gas:'1000000'},(err,thash) => {
             console.log(thash,phno);
             hash = thash;
             });
@@ -107,7 +107,7 @@ const getPatientForAdmin = async(patientQrCode) =>{
                 console.log("PAT : ",patient);
                 if(patient[0]&&patient[1])
                 {
-                    return {id:patient[0], name:patient[1], email:patient[2], phone:patient[3], doctorVisited:patient[4], doctorsVisited:patient[6]};
+                    return {id:patient[0], name:patient[1], email:patient[2], phone:patient[3], doctorVisited:patient[4], prescriptionCount:patient[6], dob:patient[7], gender:patient[8]};
                 }
                 
             });     
