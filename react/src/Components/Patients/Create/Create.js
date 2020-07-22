@@ -16,6 +16,8 @@ class Create extends Component {
             name: null,
             phno: null,
             email: null,
+            dob: null,
+            gender: null,
             click: false,
             result: undefined,
             scanButton : true,
@@ -49,11 +51,27 @@ class Create extends Component {
         })
     }
 
+    handleGender = (e) => {
+        console.log(e.target.value)
+        this.setState({
+            gender: e.target.value
+        })
+    }
+
+    handleAge = (e) => {
+        console.log(e.target.value)
+        this.setState({
+            dob: e.target.value
+        })
+    }
+
     handleSubmit = (e) => {
         e.preventDefault()
         console.log(this.state.name)
         console.log(this.state.phno)
         console.log(this.state.email)
+        console.log(this.state.dob)
+        console.log(this.state.gender)
         this.formSubmit()
         console.log("Clicked")
     }
@@ -64,6 +82,8 @@ class Create extends Component {
             "name": this.state.name,
             "phno": this.state.phno,
             "email": this.state.email,
+            "dob": this.state.dob,
+            "gender": this.state.gender
         },{
             headers: {
                 'auth-token': ls.get('authToken')
@@ -106,7 +126,9 @@ class Create extends Component {
                 this.setState({
                     patName: response.data.patient.name,
                     patEmail: response.data.patient.email,
-                    patMobile: response.data.patient.phone
+                    patMobile: response.data.patient.phone,
+                    patDOB: response.data.patient.dob,
+                    patGender: response.data.patient.gender, 
                 })
                 console.log("patList",this.state.patName)
             }
@@ -194,7 +216,9 @@ class Create extends Component {
                                                 <h2 className="patName">{this.state.patName}</h2>
                                                 
                                                 <h5 className="patEmail">{this.state.patEmail}</h5>
-                                                <h5 className="patMobile">{this.state.patMobile}</h5>  
+                                                <h5 className="patMobile">{this.state.patMobile}</h5>
+                                                <h5 className="patGender">{this.state.patGender}</h5>
+                                                <h5 className="patDOB">{this.state.patDOB}</h5>  
                                                 <button className="anotherScanButton" onClick={this.handleScanButton}>Scan</button>
                                             </>
                                         </div>
