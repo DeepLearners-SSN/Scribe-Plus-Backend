@@ -5,6 +5,9 @@ import string
 from flask_socketio import SocketIO
 import sys
 
+import spacy
+from spacy.matcher import PhraseMatcher
+
 import doNer
 
 async_mode = None
@@ -13,6 +16,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode=async_mode, ping_timeout=10000)
 
+nlp = spacy.load('./SymptomsLatestModel - v1')
 
 #helper functions
 def randomString(stringLength=8):
@@ -52,11 +56,42 @@ def modelProcess():
     print(socketId, file=sys.stderr)
     socketio.emit('message', data)
     nerDict = doNer.doNer(data['doctor']['doc']['item'])
+    SymptomsDict = find_symptoms(data['doctor']['doc']['item'])
+    if SymptomsDict['symptoms']:
+        nerDict['symptoms'] = SymptomsDict['symptoms']
+    if SymptomsDict['intensity']:
+        nerDict['intensity'] = SymptomsDict['intensity']
     socketio.emit(socketId, nerDict)
     return jsonify({
         "message": "running socket to emit message",
         "sockId": socketId
     })
+
+def find_symptoms(data):
+    doc = nlp(data)
+    response = {
+        'message': "This is your response"
+    }
+    symptoms = " "
+    intensity = " "
+    entities = [(ent.text, ent.label_) for ent in doc.ents]
+    for item in entities:
+        if item[1] == 'SYMPTOMS':
+            symptoms += item[0] + ', '
+        if item[1] == 'INTENSITY':
+            intensity += item[0] + ', '
+
+    if symptoms.strip:
+        response['symptoms'] = symptoms[:-2].strip()
+    if intensity.strip():
+        response['intensity'] = intensity[:-2].strip()
+    
+    return response
+
+
+
+    
+
 
 
 if __name__ == "__main__":
