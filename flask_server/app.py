@@ -61,6 +61,7 @@ def modelProcess():
         nerDict['symptoms'] = SymptomsDict['symptoms']
     if SymptomsDict['intensity']:
         nerDict['intensity'] = SymptomsDict['intensity']
+    socketio.emit('message', nerDict)
     socketio.emit(socketId, nerDict)
     return jsonify({
         "message": "running socket to emit message",
