@@ -52,15 +52,18 @@ def model(message):
 @app.route('/api/model/process', methods=['POST'])
 def modelProcess():
     data = request.json
+    print("DATA", data)
     socketId = data['doctor']['filename'][:-5]
     print(socketId, file=sys.stderr)
     socketio.emit('message', data)
     nerDict = doNer.doNer(data['doctor']['doc']['item'])
+    print("API NER", nerDict)
     SymptomsDict = find_symptoms(data['doctor']['doc']['item'])
-    if SymptomsDict['symptoms']:
+    if 'symptoms' in SymptomsDict.keys():
         nerDict['symptoms'] = SymptomsDict['symptoms']
-    if SymptomsDict['intensity']:
+    if 'intensity' in SymptomsDict.keys():
         nerDict['intensity'] = SymptomsDict['intensity']
+    print("SYMPTOMS NER", nerDict)
     socketio.emit('message', nerDict)
     socketio.emit(socketId, nerDict)
     return jsonify({
@@ -69,6 +72,7 @@ def modelProcess():
     })
 
 def find_symptoms(data):
+    print("Entered FIND SYMPTOMS")
     doc = nlp(data)
     response = {
         'message': "This is your response"
