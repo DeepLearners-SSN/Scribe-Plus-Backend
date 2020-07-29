@@ -22,7 +22,7 @@ var upload = multer({
       bucket: BUCKET_NAME,
       key: function (req, file, cb) {
           console.log(file);
-          cb(null, ''+Date.now()+'.mp3'); //use Date.now() for unique file keys
+          cb(null, ''+Date.now()+'.mp4'); //use Date.now() for unique file keys
       }
   })
 });
@@ -62,11 +62,12 @@ router.post("/audio", auth ,upload.single("file"),async (req,res,next) => {
   logger.log('info',`upload Audio Api called ${JSON.stringify(req.file)}`);
   const transcriber = new AWS.TranscribeService({ region: "us-west-2" });
   const params = {
-    LanguageCode: "en-IN",
+    LanguageCode: "en-US",
     Media: {
       MediaFileUri:
         req.file.location,
     },
+    MediaFormat: "mp4",
     MedicalTranscriptionJobName: req.file.key.slice(0,-4),
     Specialty: "PRIMARYCARE",
     Type: "CONVERSATION",
