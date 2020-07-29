@@ -74,6 +74,7 @@ router.post("/audio", auth ,upload.single("file"),async (req,res,next) => {
     Settings: {
       MaxSpeakerLabels: "2",
       ShowSpeakerLabels: true,
+      VocabularyName: "dolo"
     },
     OutputBucketName: "scribe-json1",
   };
