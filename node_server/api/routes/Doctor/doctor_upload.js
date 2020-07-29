@@ -67,7 +67,9 @@ router.post("/audio", auth ,upload.single("file"),async (req,res,next) => {
       MediaFileUri:
         req.file.location,
     },
-    TranscriptionJobName: req.file.key.slice(0,-4),
+    MedicalTranscriptionJobName: req.file.key.slice(0,-4),
+    Specialty: "PRIMARYCARE",
+    Type: "CONVERSATION",
     Settings: {
       MaxSpeakerLabels: "2",
       ShowSpeakerLabels: true,
