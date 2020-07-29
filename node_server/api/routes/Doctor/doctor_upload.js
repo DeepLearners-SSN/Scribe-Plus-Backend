@@ -74,7 +74,7 @@ router.post("/audio", auth ,upload.single("file"),async (req,res,next) => {
     },
     OutputBucketName: "scribe-json1",
   };
-  const data = await transcriber.startTranscriptionJob(params).promise();
+  const data = await transcriber.startMedicalTranscriptionJob(params).promise();
   // console.log(data);
   logger.log('info',`Uploaded Audio to S3 bucket, transcriber : ${JSON.stringify(data)} , socketId: ${req.file.key.slice(0,-4)}`);
   res.status(200).json({message:"success",socketId:req.file.key.slice(0,-4),transcriber:data});
