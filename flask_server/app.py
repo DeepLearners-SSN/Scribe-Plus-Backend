@@ -102,7 +102,7 @@ def modelProcess():
     print(socketId, file=sys.stderr)
     socketio.emit('message', data)
     data = request.json
-    transcript = data['doctor']['doc']['item']
+    transcript = data['doctor']['doc']['text']
     doc=nlp(transcript)
     preReady = [(ent.text, ent.label_,ent.start_char, ent.end_char) for ent in doc.ents]
     print("Test",preReady)
