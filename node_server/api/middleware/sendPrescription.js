@@ -4,7 +4,7 @@ const AWS = require('aws-sdk');
 var unirest = require("unirest");
 const fs = require('fs');
 const req = unirest("POST", "https://www.fast2sms.com/dev/bulk");
-// const logger = require('../../config/logger')(module);
+const logger = require('../../config/logger')(module);
 
 const ID = 'AKIA4BGGYS5LJXQVN53J';
 const SECRET = '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';
@@ -16,7 +16,8 @@ const s3 = new AWS.S3({
 });
 
 module.exports.sendPrescription = async(toEmail, name, age, gender, address, date, out /**2D Array */, patPhone) => {
-    const password = patPhone.slice(0,-5);
+  try{
+    logger.log('info',`Entered PDF SENDING SECTION `);
     const doc = new PDFDocument({userPassword:"password"});
     var transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -200,7 +201,12 @@ module.exports.sendPrescription = async(toEmail, name, age, gender, address, dat
                     throw new Error(res.error);
                 }        
             });
+            logger.log('info',`PDF SENT `);
             return await transporter.sendMail(mailOptions);
         }); 
     })
+  }
+  catch(e){
+    logger.log('error',`PDF NOT SENT ${e} `);
+  }
 };

@@ -285,6 +285,7 @@ req.body.phone
 */
 
 router.post('/create/pdf',(req,res,next) => {
+    logger.log('info',`Get PDF API called ${req.body}`);
     const prescribed = req.body.out
       arr = []
       out = []
