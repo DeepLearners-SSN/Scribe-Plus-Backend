@@ -31,17 +31,11 @@ module.exports.sendPrescription = async(toEmail, name, age, gender, address, dat
    
     // Pipe its output somewhere, like to a file or HTTP response
     // See below for browser usage
-    doc.pipe(fs.createWriteStream('prescription.pdf'));
      
     // Embed a font, set the font size, and render some text
       doc.fontSize(35)
       .text('CEC Hospital', 185, 30).fillColor("#000");
   
-      doc.image('./sih.png', {
-          fit: [200, 65],
-          align: 'center',
-          valign: 'right',
-        });
     
       doc.fontSize(15)
       .text('Dr.Rahul M.B.B.S', 30, 100).fillColor("#000");
@@ -141,11 +135,6 @@ module.exports.sendPrescription = async(toEmail, name, age, gender, address, dat
     .text('Powered By', 430, 700).fillColor("#000");
     
     // Add an image, constrain it to a given size, and center it vertically and horizontally
-    doc.image('./HealthRx.png', {
-      fit: [100, 100],
-      align: 'center',
-      valign: 'right',
-    });
      
     // Finalize PDF file
     doc.end();
