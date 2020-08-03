@@ -23,8 +23,7 @@
   },
   "labels":{
     "ner":[
-      "INTENSITY",
-      "SYMPTOMS"
+      "MEDICINE"
     ]
   }
 }

@@ -74,10 +74,6 @@ router.get('/list', auth ,async (req,res,next)=> {
  *      consumes:
  *       - application/json
  *      parameters:
- *       - name: auth-token
- *         description: auth token got from  login.
- *         in: header
- *         type: string
  *       - in: body
  *         name: doctor
  *         schema :
@@ -96,7 +92,7 @@ router.get('/list', auth ,async (req,res,next)=> {
  *                      address: string
  *                  
  */
-router.post('/address', auth ,async (req,res,next)=> {
+router.post('/address' ,async (req,res,next)=> {
     if(req.body.phone){
         getDocCount().then(async (count) => {
             console.log("DOC COUNT : ",count);
