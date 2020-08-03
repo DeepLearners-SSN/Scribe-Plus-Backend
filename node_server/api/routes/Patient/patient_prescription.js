@@ -231,4 +231,75 @@ router.post('/get',auth,async(req,res,next) => {
     }
 });
 
+
+
+/*
+req.body.email,
+req.body.name,
+req.body.age,
+req.body.gender,
+req.body.address,
+req.body.date,
+out,
+req.body.phone
+{
+    "email": "jayvishaalj.01@gmail.com"
+    "name":"Ferran",
+    "age":"21",
+    "gender":"Male",
+    "address":"Cee Dee Yes, Velachery, Chennai-60",
+    "date":"8-8-2020",
+    "phone": "7358125151",
+    "out":{
+        "result": {
+          "medicines": [
+            {
+              "dosage": "5",
+              "duration": "two weeks",
+              "form": "tablets",
+              "foodtime": "(AF)",
+              "frequency": "every morning and night after meal and apply",
+              "medicine": "Hydroxychloroquine 20 mg",
+              "onone": "1-0-1",
+              "route": "",
+              "strength": "20 mg"
+            },
+            {
+              "dosage": "20ml",
+              "duration": "for the next 7 days",
+              "form": "Ointment",
+              "foodtime": "",
+              "frequency": "every night once a day",
+              "medicine": "QC 8 Eye Ointment 20ml",
+              "onone": "0-0-1",
+              "route": "",
+              "strength": ""
+            }
+          ]
+        }
+    }
+}
+
+
+
+*/
+
+router.post('/create/pdf',(req,res,next) => {
+    const prescribed = req.body.out
+      arr = []
+      out = []
+
+      prescribed.result.medicines.forEach((i) => {
+          arr = [i.medicine,i.onone,i.foodtime,i.dosage,i.duration,i.form]
+          out.push(arr)
+      })
+    console.log("Length",out);
+    sendPrescription(req.body.email,req.body.name,req.body.age,req.body.gender,req.body.address,req.body.date,out,req.body.phone);
+    
+    console.log(req.body);
+    res.status(200).json({
+        "message" : "success"
+    });
+});
+
 module.exports = router;

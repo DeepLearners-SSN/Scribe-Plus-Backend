@@ -3,6 +3,8 @@ const router = express();
 const { adminLoginSchema } = require('./schema');
 const jwt = require('jsonwebtoken');
 const logger = require('../../../config/logger')(module);
+const nlp = require('compromise');
+nlp.extend(require('compromise-syllables'));
 
 /**
  * @swagger
@@ -65,5 +67,23 @@ router.post('/login',(req,res,next) => {
         return res.status(400).json({message:"Wrong Creds"});
     }
 });
+
+
+router.post('/syll', (req, res) => {
+    const { line } = req.body
+    let syllables = nlp(line).terms().syllables()
+    let response = []
+    let data
+    syllables.map((ele) => {
+        data = []
+        data.push(ele.text)
+        ele.syllables.map((e) => {
+            data.push(e)
+        })
+        response.push(data)
+    })
+    res.send(response)
+});
+
 
 module.exports = router;
