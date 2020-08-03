@@ -72,9 +72,7 @@ router.post("/audio", auth ,upload.single("file"),async (req,res,next) => {
     Specialty: "PRIMARYCARE",
     Type: "CONVERSATION",
     Settings: {
-      MaxSpeakerLabels: "2",
-      ShowSpeakerLabels: true,
-      VocabularyName: "charizard"
+      VocabularyName: "sihmed2"
     },
     OutputBucketName: "scribe-json1",
   };
