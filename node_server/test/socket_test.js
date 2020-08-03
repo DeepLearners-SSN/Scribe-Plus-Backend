@@ -1,6 +1,6 @@
 const io = require("socket.io-client");
 
-let socket = io.connect("http://13.234.75.146:5000/");
+let socket = io.connect("http://72fbc7e761a8.ngrok.io");
 
 socket.on('message',(data) => {
     console.log("recieved : ",data);
